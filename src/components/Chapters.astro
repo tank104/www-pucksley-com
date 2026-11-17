@@ -1,0 +1,16 @@
+---
+// The parts of a film as a row of buttons. Each jumps the film with the given frame id to that part
+// and plays it (FilmPlayer.astro listens for data-film-seek).
+import type { Film } from '../lib/films';
+import { chapterTime } from '../lib/films';
+
+interface Props { film: Film; target: string }
+const { film, target } = Astro.props;
+---
+<nav class="chapters" aria-label={`Parts of the film ${film.title}`}>
+  {film.chapters.map((c) => (
+    <button type="button" data-film-target={target} data-film-seek={c.t}>
+      <span class="ch-t">{chapterTime(c.t)}</span>{c.label}
+    </button>
+  ))}
+</nav>

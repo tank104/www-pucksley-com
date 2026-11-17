@@ -1,0 +1,9 @@
+---
+// One of the puck's faces as a round picture (public/images/faces/<name>.webp, made by film/web.py
+// from the simulator's own pictures of the real faces).
+import type { FaceRef } from '../lib/content';
+
+interface Props { face: FaceRef; size?: number; class?: string }
+const { face, size = 148, class: extra = '' } = Astro.props;
+---
+<img class:list={['face', extra]} src={`/images/faces/${face.name}.webp`} alt={face.alt} width={size} height={size} loading="lazy" decoding="async" />

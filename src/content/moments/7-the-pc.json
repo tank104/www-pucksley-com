@@ -1,0 +1,29 @@
+{
+  "order": 7,
+  "when": "Night",
+  "light": "night",
+  "at": 50.8,
+  "heading": "It asks first.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Shut down the PC."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Shut down the PC? Turn for yes."
+    }
+  ],
+  "body": "Anything drastic waits for a yes on the puck itself: turn it to Yes, then tap. The Windows PC is one more thing it can run, from its volume and headphones to its apps and its power.",
+  "house": "The puck is turned, and tapped. The study’s screen goes dark.",
+  "faces": [
+    {
+      "name": "confirm-yes",
+      "alt": "The puck's Confirm face: “Shut down or restart this PC?”, with Yes picked in green."
+    }
+  ],
+  "still": {
+    "name": "pc",
+    "alt": "The card house at night, the study upstairs on the right now dark."
+  }
+}

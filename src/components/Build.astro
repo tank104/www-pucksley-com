@@ -1,0 +1,32 @@
+---
+// "Build your own": the four steps from a bare board to a puck on the bench, short, with the one
+// command each needs, and the way to the full instructions (/get-started) and the code.
+import Section from './Section.astro';
+import GithubIcon from './GithubIcon.astro';
+import { GITHUB } from '../lib/site';
+
+interface Props { build: Record<string, any> }
+const { build } = Astro.props;
+const steps: { title: string; body: string; code?: string }[] = build.steps;
+---
+<Section surface="night" air="normal" id="build" ariaLabelledby="build-heading">
+  <div class="section-head">
+    <p class="eyebrow">{build.eyebrow}</p>
+    <h2 id="build-heading">{build.heading}</h2>
+    <p class="lede">{build.lede}</p>
+  </div>
+  <ol class="build-steps">
+    {steps.map((s, i) => (
+      <li class="build-step">
+        <span class="build-no" aria-hidden="true">{i + 1}</span>
+        <h3>{s.title}</h3>
+        <p>{s.body}</p>
+        {s.code && <pre class="code"><code>{s.code}</code></pre>}
+      </li>
+    ))}
+  </ol>
+  <div class="build-actions">
+    <a class="btn btn--lg" href="/get-started/">{build.cta}</a>
+    <a class="btn btn--lg btn--ghost" href={GITHUB.project} rel="noopener"><GithubIcon /> tank104/Pucksley</a>
+  </div>
+</Section>

@@ -1,0 +1,64 @@
+---
+// The early access form. Posts to the /api/waitlist Function (api/waitlist), which keeps the
+// address and the time it was left, as on the sibling sites. Without script, or if the request
+// fails, the visitor is told and given the address to write to instead.
+import Section from './Section.astro';
+import Logo from './Logo.astro';
+import { reader } from '../lib/content';
+
+interface Props { access: Record<string, any> }
+const { access: a } = Astro.props;
+const site = await reader.singletons.siteSettings.read();
+---
+<Section surface="night" air="wide" id="early-access" class="access" ariaLabelledby="access-heading">
+  <Logo on="dark" mark height={72} class="access-mark" />
+  <h2 id="access-heading">{a.heading}</h2>
+  <p class="lede">{a.lede}</p>
+
+  <form class="form" id="accessForm" novalidate>
+    <div class="form-row">
+      <label class="sr-only" for="accessEmail">{a.emailLabel}</label>
+      <input type="email" id="accessEmail" name="email" required autocomplete="email" placeholder={a.emailPlaceholder} />
+      <button class="btn btn--lg" type="submit">{a.submitLabel}</button>
+    </div>
+    <p class="fineprint">{a.fineprint} <a class="textlink" href="/privacy/">{a.privacyLabel}</a></p>
+    <p class="form-error" id="accessError" role="alert" hidden>
+      {a.errorMessage} <a class="textlink" href={`mailto:${site?.contactEmail}`}>{site?.contactEmail}</a>
+    </p>
+  </form>
+
+  <div class="confirm" id="accessConfirm" role="status" tabindex="-1">
+    <h3>{a.confirmationTitle}</h3>
+    <p>{a.confirmationBody}</p>
+  </div>
+</Section>
+
+<script>
+  const form = document.getElementById('accessForm') as HTMLFormElement | null;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('accessEmail') as HTMLInputElement;
+    const error = document.getElementById('accessError');
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (!input.checkValidity()) {
+      input.reportValidity();
+      return;
+    }
+    if (error) error.hidden = true;
+    if (button) button.disabled = true;
+
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: input.value }),
+      });
+      if (!res.ok) throw new Error('request failed');
+      document.getElementById('early-access')?.classList.add('done');
+      document.getElementById('accessConfirm')?.focus();
+    } catch {
+      if (button) button.disabled = false;
+      if (error) error.hidden = false;
+    }
+  });
+</script>

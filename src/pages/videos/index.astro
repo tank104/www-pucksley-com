@@ -1,0 +1,45 @@
+---
+// The Pucksley film: an ordinary video behind its poster (FilmPlayer), its parts as buttons, what it
+// says written out, and a line on how it was made. No download button: see docs/videos.md.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/Section.astro';
+import FilmPlayer from '../../components/FilmPlayer.astro';
+import Chapters from '../../components/Chapters.astro';
+import { A_DAY, FILMS, runningTime, videoObject } from '../../lib/films';
+
+const site = Astro.site!;
+---
+<BaseLayout
+  title="The film: Pucksley"
+  description="A day on the bench: one shot of one day, a card house on a kitchen bench, and Pucksley, the voice assistant you can hold, running it from first light to lights out."
+  ogImage={A_DAY.og}
+  jsonLd={FILMS.map((film) => videoObject(film, site))}
+>
+  <Section surface="night" air="hero" id="top">
+    <p class="eyebrow">The Pucksley film</p>
+    <h1>One puck, the whole house.</h1>
+    <p class="lede">One shot of one day. Somebody talks to the puck from first light to lights out, and the house answers in light.</p>
+
+    <div class="film-block" id="a-day">
+      <div class="film-title">
+        <h2>{A_DAY.title}</h2>
+        <span class="film-len">{runningTime(A_DAY.seconds)}</span>
+        <p>{A_DAY.blurb}</p>
+      </div>
+      <FilmPlayer film={A_DAY} id="film" />
+      <Chapters film={A_DAY} target="film" />
+      <details class="transcript">
+        <summary>Read what the film says</summary>
+        <ol>
+          {A_DAY.transcript.map((l) => <li><span>{l.who}</span>{l.line}</li>)}
+        </ol>
+      </details>
+      <p class="film-made">{A_DAY.madeOf}</p>
+    </div>
+
+    <div class="films-next">
+      <a class="btn btn--lg" href="/#day">Go through the day</a>
+      <a class="textlink" href="/#early-access">Hear when it’s ready</a>
+    </div>
+  </Section>
+</BaseLayout>

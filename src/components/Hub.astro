@@ -1,0 +1,54 @@
+---
+// "Where it thinks": the puck, the hub and Claude, in a row, and what follows from that.
+import Section from './Section.astro';
+import Logo from './Logo.astro';
+
+interface Props { hub: Record<string, any> }
+const { hub } = Astro.props;
+type Item = { name: string; where: string; body: string };
+type Point = { title: string; body: string };
+const nodes: Item[] = hub.nodes;
+const points: Point[] = hub.points;
+---
+<Section surface="blue" air="normal" id="hub" ariaLabelledby="hub-heading">
+  <div class="section-head">
+    <p class="eyebrow">{hub.eyebrow}</p>
+    <h2 id="hub-heading">{hub.heading}</h2>
+    <p class="lede">{hub.lede}</p>
+  </div>
+
+  <ol class="hub-nodes" role="list">
+    {nodes.map((n, i) => (
+      <li class="hub-node">
+        <span class="hub-icon" aria-hidden="true">
+          {i === 0 && <Logo mark on="dark" height={56} />}
+          {i === 1 && (
+            <svg width="46" height="46" viewBox="0 0 46 46" fill="none" stroke="#F5F2EC" stroke-width="2.4" stroke-linejoin="round">
+              <rect x="9" y="7" width="28" height="32" rx="4" />
+              <line x1="15" y1="15" x2="31" y2="15" />
+              <line x1="15" y1="22" x2="31" y2="22" />
+              <circle cx="16" cy="31" r="2" fill="#FFD60A" stroke="none" />
+            </svg>
+          )}
+          {i === 2 && (
+            <svg width="50" height="46" viewBox="0 0 50 46" fill="none" stroke="#F5F2EC" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round">
+              <path d="M14 34h22a8 8 0 0 0 1.4-15.9A11 11 0 0 0 16.2 15 9.5 9.5 0 0 0 14 34Z" />
+            </svg>
+          )}
+        </span>
+        <h3>{n.name}</h3>
+        <p class="eyebrow">{n.where}</p>
+        <p>{n.body}</p>
+      </li>
+    ))}
+  </ol>
+
+  <div class="hub-points">
+    {points.map((p) => (
+      <div class="hub-point">
+        <h4>{p.title}</h4>
+        <p>{p.body}</p>
+      </div>
+    ))}
+  </div>
+</Section>

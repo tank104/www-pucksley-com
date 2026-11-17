@@ -1,0 +1,37 @@
+{
+  "order": 5,
+  "when": "Sunset",
+  "light": "sunset",
+  "at": 35.8,
+  "heading": "The TV off. The lamp on.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Turn off the downstairs TV."
+    },
+    {
+      "who": "Pucksley",
+      "line": "It's off."
+    },
+    {
+      "who": "You",
+      "line": "Lamp on."
+    }
+  ],
+  "body": "Televisions, smart plugs and relays, and anything Home Assistant runs: on, off, or the input changed. The Controls face keeps the ones you use most a swipe away, as dials and buttons.",
+  "house": "The lounge’s blue goes out. After the sun has gone, a warm lamp comes on in its place.",
+  "faces": [
+    {
+      "name": "tv",
+      "alt": "The puck's Controls face: Lounge TV off, with a round Go button."
+    },
+    {
+      "name": "lamp",
+      "alt": "The puck's Controls face: Lamp, with a round yellow On button."
+    }
+  ],
+  "still": {
+    "name": "lamp",
+    "alt": "After dark: the card house lit from inside, a warm lamp in the lounge and the television off."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "order": 7,
+  "openByDefault": false,
+  "question": "What leaves the house?",
+  "answer": "After a tap, what you say goes to your hub. It is turned into words there, by Whisper on the hub itself, or by the speech service you choose, and the words go to Claude. The answer is spoken by the voice you choose. The speakers, TVs and plugs are run on your own network."
+}

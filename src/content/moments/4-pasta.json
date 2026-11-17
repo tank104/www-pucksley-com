@@ -1,0 +1,33 @@
+{
+  "order": 4,
+  "when": "Afternoon",
+  "light": "afternoon",
+  "at": 25.8,
+  "heading": "Ten minutes. Starting now.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Set a timer for pasta. Ten minutes."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Ten minutes. Starting now."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Your pasta's ready."
+    }
+  ],
+  "body": "Timers, alarms and reminders, said out loud and counted down on the puck that set them. When one is done it chimes and says so, and the banner stays until you have seen it.",
+  "house": "The camera comes down to the puck and the real pot. By the time the pasta is ready, the television and the study’s screen have come on.",
+  "faces": [
+    {
+      "name": "timer",
+      "alt": "The puck's Timer face: 9:57 left on Pasta, a yellow ring almost full."
+    }
+  ],
+  "still": {
+    "name": "pasta",
+    "alt": "Down at the level of the bench: the puck in front of the house, the kitchen lit, the afternoon sun coming in from the side."
+  }
+}

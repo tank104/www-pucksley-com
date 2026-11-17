@@ -1,0 +1,200 @@
+---
+// Build your own Pucksley: from a bare board to a puck on the bench, the way the project's README
+// (github.com/tank104/Pucksley) says to. When the README's setup steps change, change these with it:
+// the README is the source, this page is the friendlier way in.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import GithubIcon from '../components/GithubIcon.astro';
+import Face from '../components/Face.astro';
+import { GITHUB, BOARD } from '../lib/site';
+
+const toc = [
+  ['need', 'What you need'],
+  ['code', 'Get the code'],
+  ['hub', 'Run the hub'],
+  ['setup', 'Set up the hub'],
+  ['flash', 'Flash the puck'],
+  ['join', 'Wi‑Fi and approval'],
+  ['plugins', 'Plugins'],
+  ['pc', 'The PC, with the hub on a NAS'],
+  ['direct', 'When the hub is off'],
+  ['own', 'Write your own plugin'],
+  ['source', 'Build and test'],
+  ['status', 'Where it is up to'],
+  ['help', 'Help and contributing'],
+];
+
+const cmd = {
+  clone: 'git clone https://github.com/tank104/Pucksley.git\ncd Pucksley',
+  docker: 'docker compose -f hub/docker-compose.yml up -d --build',
+  tray: 'dotnet run --project hub/src/Hosts/Pucksley.Tray',
+  trayBuild: './scripts/build.ps1\ndist/Pucksley/Pucksley.exe',
+  flash: 'cd firmware\nidf.py set-target esp32s3        # once\nidf.py -p COM5 flash             # your port; hold BOOT while plugging in if it will not enter download mode',
+  backup: 'python -m esptool --chip esp32s3 --port COM5 read_flash 0 0x1000000 board-backup.bin',
+  build:
+    './scripts/build.ps1                      # dist/Pucksley (self-contained hub) + dist/firmware\n' +
+    'dotnet test hub/Pucksley.sln             # the hub’s tests\n' +
+    'cd firmware; idf.py build                # the firmware\n' +
+    'cd firmware/tools/sim; ./build.sh; ./build/sim.exe   # draws every face to tools/sim/out/*.png\n' +
+    'cd firmware/tools/test; ./run.sh         # desktop tests for the firmware’s plain logic',
+};
+
+const plugins: [string, string, string][] = [
+  ['Sonos', 'Nothing: it finds your speakers on the network.', 'Rooms, volume, grouping, favourites, the TV input and line-in, a sleep timer, announcements. Single Spotify tracks on Sonos need your Sonos Spotify account number: add any Spotify playlist to Sonos Favourites once and the hub learns it.'],
+  ['Spotify', 'Create an app at developer.spotify.com (Web API), add the redirect URI shown on the plugin’s card, paste the Client ID, then press Connect.', 'Search and play anything on any device, Sonos rooms included; queue, like, shuffle, move the music, and “what was that song?”. Needs Premium.'],
+  ['Smart TVs', 'Add the TV (its type, address, and MAC address for turning it on), press Pair, and accept on the TV.', 'LG webOS, Samsung (Tizen) and Roku.'],
+  ['Smart plugs', 'Add each plug (its type and address). Tapo and Kasa need your TP-Link login.', 'Shelly (Gen1 to Gen3), TP-Link Kasa, Tapo, or any on/off URL.'],
+  ['Home Assistant', 'Its URL and a long-lived access token.', 'Find and control anything, run scenes and scripts, and “ask Home Assistant” for whatever the tools do not cover.'],
+  ['Heating', 'The controller’s API URL and a token.', 'Written for one underfloor heating controller’s web API (the README has the details); through Home Assistant otherwise.'],
+  ['Weather', 'Nothing: it uses the household’s location.', 'Open-Meteo, no key: now, hourly and seven days.'],
+  ['Timers', 'Nothing.', 'Timers, alarms (repeating too) and reminders, spoken and shown on the puck that set them.'],
+  ['Memory and lists', 'Nothing.', '“Remember that…” (always in Claude’s context), and shopping and to-do lists.'],
+  ['Custom actions', 'Define them on the plugin’s card.', 'No-code tools: call a URL (webhooks, Node-RED, IFTTT) or run a script, with parameters.'],
+  ['MCP servers', 'Add a command or a URL.', 'Any Model Context Protocol server’s tools become Claude’s tools.'],
+  ['This PC', 'Nothing (on a Windows hub only).', 'Volume, media keys, what is playing, audio outputs, per-app volume, apps and files, lock, sleep and shut down (it asks first), “what’s on my screen?”, the clipboard, typing, dark mode.'],
+  ['Speech', 'API keys on their cards.', 'Deepgram to hear; Azure, OpenAI (and compatible: Groq, local Speaches or Kokoro), ElevenLabs, local Whisper and Piper, and Windows voices.'],
+  ['Talking face', 'Openspline on a PC with an NVIDIA GPU.', 'While Pucksley speaks, the puck shows a face animated live to the voice. Pick one of 20 faces, or give it your own picture.'],
+];
+---
+<BaseLayout
+  title="Build your own: Pucksley"
+  description={`How to build a Pucksley: flash the puck's firmware onto a ${BOARD}, run the hub in Docker or on a Windows PC, add your Anthropic key, and set up the plugins for your house.`}
+>
+  <Section surface="night" air="hero" id="top" class="docs-hero">
+    <p class="eyebrow">Get started</p>
+    <h1>Build your own Pucksley.</h1>
+    <p class="lede">
+      A puck is a {BOARD} flashed with Pucksley’s firmware. Behind it, the hub runs Claude with tools for your house. Everything here is
+      from the project’s README, which has the rest.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn--lg" href={GITHUB.project} rel="noopener"><GithubIcon /> tank104/Pucksley</a>
+      <a class="textlink" href={GITHUB.readme} rel="noopener">Read the README</a>
+    </div>
+  </Section>
+
+  <Section surface="card" air="normal" class="docs">
+    <div class="docs-grid">
+      <nav class="docs-toc" aria-label="On this page">
+        <p class="eyebrow">On this page</p>
+        <ol>
+          {toc.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
+        </ol>
+      </nav>
+
+      <article class="docs-body">
+        <h2 id="need">What you need</h2>
+        <ul>
+          <li><strong>The board:</strong> a {BOARD}. Its round 1.75-inch AMOLED touch screen, microphones, speaker, motion sensor, side button and battery are the puck.</li>
+          <li><strong>Somewhere for the hub:</strong> a NAS or other x86-64 machine that runs Docker (Synology’s Intel and AMD “plus” models do), or a Windows PC.</li>
+          <li><strong>An Anthropic API key</strong> for Claude. Use one with a spending limit.</li>
+          <li><strong>A way to hear and speak.</strong> Whisper and Windows voices need no key. Deepgram (to hear) and Azure (to speak) are what the project recommends.</li>
+          <li><strong>To flash the puck:</strong> ESP-IDF 5.5 and a USB cable. To build the hub from source: the .NET 10 SDK.</li>
+        </ul>
+
+        <h2 id="code">1. Get the code</h2>
+        <pre class="code"><code set:text={cmd.clone} /></pre>
+
+        <h2 id="hub">2. Run the hub</h2>
+        <h3>On a NAS, in Docker</h3>
+        <pre class="code"><code set:text={cmd.docker} /></pre>
+        <p>
+          Host networking is needed, for finding the pucks and the Sonos speakers. Settings live in <code>hub/pucksley-data/</code>. On a
+          Synology, create a project from <a class="textlink" href={GITHUB.compose} rel="noopener"><code>hub/docker-compose.yml</code></a> in
+          Container Manager. The container has everything except the Windows plugins.
+        </p>
+        <h3>On a Windows PC</h3>
+        <pre class="code"><code set:text={cmd.tray} /></pre>
+        <p>Or build it once and run the app:</p>
+        <pre class="code"><code set:text={cmd.trayBuild} /></pre>
+        <p>
+          A tray icon appears and the hub’s page opens at <code>http://127.0.0.1:8765</code>. From another computer, use the link with
+          <code>?key=</code> that the tray menu and the log show.
+        </p>
+
+        <h2 id="setup">3. Set up the hub</h2>
+        <p>In the hub’s page:</p>
+        <ul>
+          <li><strong>Assistant:</strong> paste your Anthropic API key. The model defaults to Claude Opus 5.5 at low effort, which keeps spoken answers quick.</li>
+          <li>
+            <strong>Voice:</strong> how it hears you and how it speaks. Deepgram (Nova-3) to hear and Azure to speak, with the Australian
+            voice <code>en-AU-AnnetteNeural</code>, is the recommended pair; add their keys on the Plugins page. Whisper runs on the hub
+            with no key (it downloads a 142 MB model the first time, and is slow on a NAS’s processor). Windows voices work straight away;
+            OpenAI, ElevenLabs and Azure sound far better.
+          </li>
+          <li><strong>Household:</strong> where you live (for the weather and local answers), the time zone, and a few lines about the home: who lives here, which speaker is where. Claude reads them with every question.</li>
+        </ul>
+        <p>Use <strong>Talk</strong> on the page to try the whole loop with your browser’s microphone before there is a puck.</p>
+
+        <h2 id="flash">4. Flash the puck</h2>
+        <pre class="code"><code set:text={cmd.flash} /></pre>
+        <p>To keep a copy of everything on the board first (all 16 MB):</p>
+        <pre class="code"><code set:text={cmd.backup} /></pre>
+
+        <h2 id="join">5. Wi‑Fi and approval</h2>
+        <div class="docs-faces">
+          <Face face={{ name: 'setup', alt: "The puck's Wi‑Fi setup face: join Puck-1D4D, then open 192.168.4.1, with a QR code." }} size={150} />
+          <Face face={{ name: 'setup-code', alt: "The puck's New puck face: a three-digit code to check on the hub's page." }} size={150} />
+        </div>
+        <ul>
+          <li><strong>Plugged into the hub’s PC by USB:</strong> the hub trusts it straight away and lists it under Pucks. Use “Wi‑Fi setup over USB” there to send it your network; it joins, finds the hub by itself, and moves to Wi‑Fi.</li>
+          <li><strong>Without a PC:</strong> a puck with no Wi‑Fi opens its own network, Puck‑XXXX, and shows a QR code. Join it from your phone and the setup page opens (or go to 192.168.4.1). Pick your network and type the password. The puck then shows three digits, and the hub’s page asks you to approve it with the same code.</li>
+        </ul>
+        <p>Give each puck a <strong>name</strong> and a <strong>room</strong> on the hub’s page: “turn the music down” from the kitchen puck then means the kitchen speaker.</p>
+
+        <h2 id="plugins">6. Plugins</h2>
+        <p>These come with the hub. Each has a card on its Plugins page.</p>
+        <div class="docs-table">
+          <table>
+            <thead><tr><th scope="col">Plugin</th><th scope="col">To set up</th><th scope="col">What it does</th></tr></thead>
+            <tbody>
+              {plugins.map(([name, setup, does]) => <tr><th scope="row">{name}</th><td>{setup}</td><td>{does}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="pc">7. The PC, with the hub on a NAS</h2>
+        <p>The PC’s controls (its volume, apps and power) can only run on the PC. With the hub on a NAS, the PC’s app lends it just those:</p>
+        <ol>
+          <li>On the PC, run the tray app. In its page, under Household and More than one hub, turn off “Pucks connect to this hub”, turn on “Share this hub’s tools”, and list <code>pc-audio</code> and <code>pc</code> under “Only these plugins”. The page then shows an address and a key line.</li>
+          <li>On the NAS hub’s page: Plugins, MCP servers, add a server: name <code>pc</code>, transport <code>http</code>, that address, and the key line under Headers.</li>
+          <li>Allow the app through Windows Firewall on private networks, and give the PC a fixed address in the router.</li>
+        </ol>
+        <p>Anything drastic, like shutting the PC down, is still confirmed on the puck.</p>
+
+        <h2 id="direct">When the hub is off</h2>
+        <p>
+          With an Anthropic key and a cloud speech service set up on the hub, the hub gives each puck a copy when it connects. From then on,
+          if the puck cannot reach a hub, a tap still works: it listens, asks Claude (with web search) and answers in the cloud voice. The
+          house, the music and the PC wait for the hub. The keys are kept on the puck, so use ones you can revoke.
+        </p>
+
+        <h2 id="own">Write your own plugin</h2>
+        <p>
+          A plugin is a C# class whose methods carry <code>[Tool]</code> attributes. Build it, drop the DLL into the hub’s
+          <code>plugins</code> folder, and Claude can use it. For anything simpler, a custom action or an MCP server needs no code at all.
+          The <a class="textlink" href={GITHUB.plugins} rel="noopener">plugin guide</a> has the details, and the
+          <a class="textlink" href={GITHUB.protocol} rel="noopener">protocol</a> and
+          <a class="textlink" href={GITHUB.architecture} rel="noopener">architecture</a> notes say how the puck and hub talk.
+        </p>
+
+        <h2 id="source">Build and test</h2>
+        <pre class="code"><code set:text={cmd.build} /></pre>
+
+        <h2 id="status">Where it is up to</h2>
+        <p>
+          Pucksley is young, and moving quickly. The README keeps an honest list of
+          <a class="textlink" href={GITHUB.status} rel="noopener">what has been checked and what has not</a>: start there before you buy a
+          board, and expect rough edges.
+        </p>
+
+        <h2 id="help">Help and contributing</h2>
+        <p>
+          Something did not work, or could be better? <a class="textlink" href={GITHUB.issues} rel="noopener">Open an issue</a>. Pull
+          requests are welcome for the puck, the hub and its plugins, and for <a class="textlink" href={GITHUB.website} rel="noopener">this
+          website</a>. Everything is under the <a class="textlink" href={GITHUB.licence} rel="noopener">MIT licence</a>.
+        </p>
+      </article>
+    </div>
+  </Section>
+</BaseLayout>

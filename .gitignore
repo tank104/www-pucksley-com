@@ -1,0 +1,42 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.*
+!.env.example
+.env.production
+
+# macOS-specific files
+.DS_Store
+Thumbs.db
+
+# jetbrains setting folder
+.idea/
+
+# VS Code (keep extensions recommendation)
+.vscode/*
+!.vscode/extensions.json
+
+# Claude Code session-local state (not project content)
+.claude/
+
+# The film's working files: every rendered frame, the downloaded sound and textures, and the full-size
+# films (about six gigabytes). The scripts that make them are kept; the web copy is in public/videos/.
+film/blender/cache/
+film/renders/
+__pycache__/
+
+# A still of the talking face: a photograph of a real person, from Openspline's set of faces.
+film/screens/30_talking_face.png

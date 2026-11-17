@@ -1,0 +1,6 @@
+{
+  "order": 5,
+  "title": "Heating",
+  "where": "The internet",
+  "body": "The house’s setpoint, or one room at a time, by half a degree, through Home Assistant or a heating controller with its own web API."
+}

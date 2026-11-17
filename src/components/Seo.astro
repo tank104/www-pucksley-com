@@ -1,0 +1,51 @@
+---
+// The head tags every page needs: title, description, canonical link, share card, icons. No
+// analytics: there is nothing here to measure yet.
+import { reader } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  noindex?: boolean;
+  /** Structured data for the page: one object or several. */
+  jsonLd?: object | object[];
+}
+
+const settings = await reader.singletons.siteSettings.read();
+const {
+  title = 'Pucksley: a voice assistant you can hold',
+  description = 'Pucksley is a round puck for the kitchen bench. Tap it and ask: it answers out loud, and runs the music, the TV, the lamps, the heating and the PC through a hub in your home.',
+  ogImage = '/og-image.jpg',
+  noindex = false,
+  jsonLd,
+} = Astro.props;
+
+const site = Astro.site;
+const canonical = site ? new URL(Astro.url.pathname, site).href : Astro.url.pathname;
+const ogImageUrl = site ? new URL(ogImage, site).href : ogImage;
+const ld = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={settings?.siteName ?? 'Pucksley'} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta name="theme-color" content="#0B0B0D" />
+{noindex && <meta name="robots" content="noindex" />}
+{ld.map((item) => <script type="application/ld+json" set:html={JSON.stringify(item)} />)}

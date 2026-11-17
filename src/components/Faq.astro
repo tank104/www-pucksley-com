@@ -1,0 +1,26 @@
+---
+import Section from './Section.astro';
+import type { FaqItemT } from '../lib/content';
+
+interface Props { intro: Record<string, any>; items: FaqItemT[] }
+const { intro, items } = Astro.props;
+---
+<Section surface="card" air="normal" id="questions" class="faq" ariaLabelledby="faq-heading">
+  <div class="faq-grid">
+    <div class="section-head">
+      <p class="eyebrow">{intro.eyebrow}</p>
+      <h2 id="faq-heading">{intro.heading}</h2>
+    </div>
+    <div class="faq-list">
+      {items.map((item) => (
+        <details class="faq-item" open={item.openByDefault}>
+          <summary>
+            <span>{item.question}</span>
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" /></svg>
+          </summary>
+          <p>{item.answer}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</Section>

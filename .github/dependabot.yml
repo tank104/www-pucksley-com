@@ -1,0 +1,28 @@
+version: 2
+
+multi-ecosystem-groups:
+  weekly-deps:
+    schedule:
+      interval: weekly
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
+
+  - package-ecosystem: npm
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: /api
+    patterns: ["*"]
+    multi-ecosystem-group: weekly-deps
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

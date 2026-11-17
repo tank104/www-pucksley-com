@@ -1,0 +1,6 @@
+{
+  "order": 1,
+  "openByDefault": true,
+  "question": "Is it really open source?",
+  "answer": "Yes. The puck’s firmware, the hub and every plugin are on GitHub under the MIT licence, and so is this website. Build one, change it, and send what you make back if you like."
+}

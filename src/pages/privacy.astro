@@ -1,0 +1,48 @@
+---
+// What this website keeps. It covers the site only: Pucksley, the product, is not on sale yet.
+// Change `lastUpdated` whenever the page's meaning changes.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import { reader } from '../lib/content';
+
+const site = await reader.singletons.siteSettings.read();
+const email = site?.contactEmail ?? 'hello@nimblehive.com';
+const lastUpdated = '18 November 2026';
+---
+<BaseLayout title="Privacy: Pucksley" description="What the Pucksley website keeps: no cookies, no analytics, and one email address if you ask to hear when it is ready.">
+  <Section surface="card" air="hero" id="top" wrapClass="narrow" class="prose">
+    <p class="eyebrow">Privacy</p>
+    <h1>What this site keeps.</h1>
+    <p class="updated">Last updated {lastUpdated}</p>
+
+    <h2>The short version</h2>
+    <p>
+      This website sets no cookies and loads no analytics. Its typeface, pictures and film are served from the site itself, so
+      visiting it sends nothing to anyone else.
+    </p>
+
+    <h2>If you ask to hear when it is ready</h2>
+    <p>
+      We keep the email address you give us and the time you gave it, so that we can write to you when there is a puck you can have.
+      It is kept in our own storage, not in a mailing-list service. We do not share it or sell it, and we do not use it for anything
+      else.
+    </p>
+    <p>
+      To have it removed, write to <a class="textlink" href={`mailto:${email}`}>{email}</a> from that address and we will delete it.
+    </p>
+
+    <h2>The film</h2>
+    <p>
+      The film on this site is an ordinary video file. Nothing is fetched until you press play, and playing it is not recorded.
+    </p>
+
+    <h2>Pucksley itself</h2>
+    <p>
+      This page is about the website. Pucksley, the puck and its hub, is not on sale yet. When it is, this page will say what it keeps,
+      where what you say to it goes, and what leaves your home.
+    </p>
+
+    <h2>Questions</h2>
+    <p>Write to <a class="textlink" href={`mailto:${email}`}>{email}</a>.</p>
+  </Section>
+</BaseLayout>

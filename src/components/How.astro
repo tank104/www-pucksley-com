@@ -1,0 +1,26 @@
+---
+// "Tap, talk, turn": how the puck is used, each with the face it shows.
+import Section from './Section.astro';
+import Face from './Face.astro';
+import type { FaceRef } from '../lib/content';
+
+interface Props { how: Record<string, any> }
+const { how } = Astro.props;
+const items: { title: string; body: string; face: FaceRef }[] = how.items;
+---
+<Section surface="card" air="normal" id="how" ariaLabelledby="how-heading">
+  <div class="section-head">
+    <p class="eyebrow">{how.eyebrow}</p>
+    <h2 id="how-heading">{how.heading}</h2>
+    <p class="lede">{how.lede}</p>
+  </div>
+  <div class="how-grid">
+    {items.map((item) => (
+      <div class="how-item">
+        <Face face={item.face} size={168} />
+        <h3>{item.title}</h3>
+        <p>{item.body}</p>
+      </div>
+    ))}
+  </div>
+</Section>

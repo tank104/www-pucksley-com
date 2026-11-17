@@ -1,0 +1,6 @@
+{
+  "order": 6,
+  "openByDefault": false,
+  "question": "Which AI does it use?",
+  "answer": "Claude, made by Anthropic, with your own API key. The hub gives it the tools for your house, and it searches the web when a question needs it."
+}

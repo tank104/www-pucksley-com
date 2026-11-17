@@ -1,0 +1,29 @@
+{
+  "order": 3,
+  "when": "Midday",
+  "light": "midday",
+  "at": 19.8,
+  "heading": "One room, then two.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Group the kitchen with the ensuite."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Done. Both rooms."
+    }
+  ],
+  "body": "Sonos rooms can be grouped, moved and turned down by name, and Spotify plays anything on any speaker it can reach. The Home face shows what is playing in the puck's room: tap to pause, swipe for the next track.",
+  "house": "The ensuite upstairs lights yellow as well, and the music plays in both.",
+  "faces": [
+    {
+      "name": "playing",
+      "alt": "The puck's Home face: “Simply Joyful” by William Claeson, playing in the Kitchen."
+    }
+  ],
+  "still": {
+    "name": "rooms",
+    "alt": "Two rooms of the card house glow yellow, the kitchen downstairs and the ensuite upstairs."
+  }
+}

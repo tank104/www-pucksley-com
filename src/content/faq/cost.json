@@ -1,0 +1,6 @@
+{
+  "order": 3,
+  "openByDefault": false,
+  "question": "What does it cost to run?",
+  "answer": "The software is free. Claude is paid for as you use it, with your own Anthropic API key. Cloud speech services charge for use too, unless you run Whisper and Piper on the hub instead."
+}

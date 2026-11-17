@@ -1,0 +1,33 @@
+---
+// The home page follows the film: the hero and "A day on the bench" itself, then the film's day a
+// moment at a time, how the puck is used, what it runs, where it thinks, how to build one, the
+// questions, and the form for hearing about a ready-made puck.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Day from '../components/Day.astro';
+import How from '../components/How.astro';
+import Runs from '../components/Runs.astro';
+import Hub from '../components/Hub.astro';
+import Build from '../components/Build.astro';
+import Faq from '../components/Faq.astro';
+import EarlyAccess from '../components/EarlyAccess.astro';
+import { reader, getMoments, getPlugins, getFaqItems } from '../lib/content';
+import { A_DAY, videoObject } from '../lib/films';
+
+const home = await reader.singletons.home.read();
+if (!home) throw new Error('src/content/pages/home.json is missing or unreadable.');
+
+const moments = await getMoments();
+const plugins = await getPlugins();
+const faqItems = await getFaqItems();
+---
+<BaseLayout jsonLd={videoObject(A_DAY, Astro.site!)}>
+  <Hero hero={home.hero} />
+  <Day intro={home.day} moments={moments} />
+  <How how={home.how} />
+  <Runs runs={home.runs} plugins={plugins} />
+  <Hub hub={home.hub} />
+  <Build build={home.build} />
+  <Faq intro={home.faqIntro} items={faqItems} />
+  <EarlyAccess access={home.access} />
+</BaseLayout>

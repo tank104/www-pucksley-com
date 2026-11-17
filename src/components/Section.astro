@@ -1,0 +1,26 @@
+---
+// The one recurring structural device of the page, as on the sibling sites: `surface` (what the
+// section is made of) and `air` (how much room it gets) are two independent props. `light` is the
+// film's light at one moment of the day, and stands in for a surface.
+import type { Light } from '../lib/site';
+
+type Surface = 'card' | 'deep' | 'night' | 'blue';
+type Air = 'hero' | 'tight' | 'normal' | 'wide';
+
+interface Props {
+  surface?: Surface;
+  light?: Light;
+  air?: Air;
+  id?: string;
+  class?: string;
+  wrapClass?: string;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+}
+const { surface, light, air, id, class: extra = '', wrapClass = '', ariaLabel, ariaLabelledby } = Astro.props;
+---
+<section data-surface={surface} data-light={light} data-air={air} id={id} class={extra} aria-label={ariaLabel} aria-labelledby={ariaLabelledby}>
+  <div class:list={['wrap', wrapClass]}>
+    <slot />
+  </div>
+</section>

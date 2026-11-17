@@ -1,0 +1,24 @@
+{
+  "order": 1,
+  "when": "First light",
+  "light": "dawn",
+  "at": 0,
+  "heading": "It's an assistant first.",
+  "said": [
+    {
+      "who": "You",
+      "line": "What's the weather doing this afternoon?"
+    },
+    {
+      "who": "Pucksley",
+      "line": "Clearing by two. Take a jacket till then."
+    }
+  ],
+  "body": "Tap it and ask. It listens while you talk, notices when you stop, and answers out loud on its own speaker, with the web to hand when a question needs it. Nothing in the house has to be connected for that.",
+  "house": "Nothing happens in the house. It is still white, and the sun has just reached the bench.",
+  "faces": [],
+  "still": {
+    "name": "morning",
+    "alt": "First light on the kitchen bench: the white card house, a pot, a plant, a cup, and the black puck in front of the house."
+  }
+}

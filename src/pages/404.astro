@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import Logo from '../components/Logo.astro';
+---
+<BaseLayout title="Page not found: Pucksley" noindex={true}>
+  <Section surface="night" air="hero" id="top" wrapClass="narrow" class="notfound">
+    <Logo mark on="dark" height={120} class="notfound-mark" />
+    <h1>Sorry, I didn’t catch that.</h1>
+    <p class="lede">That page does not exist, or it has moved.</p>
+    <div class="hero-actions">
+      <a class="btn btn--lg" href="/">Back to the start</a>
+      <a class="textlink" href="/get-started/">Build your own</a>
+    </div>
+  </Section>
+</BaseLayout>

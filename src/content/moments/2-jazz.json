@@ -1,0 +1,29 @@
+{
+  "order": 2,
+  "when": "Morning",
+  "light": "morning",
+  "at": 9.8,
+  "heading": "It knows which room it's in.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Play some jazz in the kitchen."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Jazz, in the kitchen."
+    }
+  ],
+  "body": "Every puck has a room, so music from the kitchen puck means the kitchen speaker. Then turn the puck itself, the whole of it, and the music turns up with it.",
+  "house": "The kitchen lights up yellow and notes rise from its speaker. When the puck is turned they grow, and so does the music.",
+  "faces": [
+    {
+      "name": "volume",
+      "alt": "The puck's volume face: 42, with a yellow arc most of the way round."
+    }
+  ],
+  "still": {
+    "name": "music",
+    "alt": "The kitchen in the card house glows yellow, notes rising from it, and the puck shows two yellow bars."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "order": 10,
+  "openByDefault": false,
+  "question": "How can I help?",
+  "answer": "Build one and tell us what broke. Issues and pull requests are welcome on GitHub, for the puck, the hub and its plugins, and for this website."
+}

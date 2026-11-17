@@ -1,0 +1,6 @@
+{
+  "order": 5,
+  "openByDefault": false,
+  "question": "Does it need a computer?",
+  "answer": "To run the house it needs a hub at home: a NAS or other x86-64 machine that runs Docker, or a Windows PC with the Pucksley app in its tray. With no hub it still answers questions, on its own, over Wi‑Fi."
+}

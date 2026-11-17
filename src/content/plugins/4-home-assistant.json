@@ -1,0 +1,6 @@
+{
+  "order": 4,
+  "title": "Home Assistant",
+  "where": "Your network",
+  "body": "Anything Home Assistant already runs, its scenes and scripts included, and a way to ask it whatever the other plugins do not cover."
+}

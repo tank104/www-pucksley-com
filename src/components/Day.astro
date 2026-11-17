@@ -1,0 +1,69 @@
+---
+// "A day on the bench": the film's day again, a moment at a time, each in the film's own light at
+// that hour. Every moment has what was said, what it means, what the house did, a still from the
+// film (which plays the film from there) and the faces that were on the puck's screen.
+import Section from './Section.astro';
+import Face from './Face.astro';
+import type { Moment } from '../lib/content';
+import { chapterTime } from '../lib/films';
+
+interface Props { intro: Record<string, any>; moments: Moment[] }
+const { intro, moments } = Astro.props;
+---
+<div id="day">
+  <Section light="dawn" air="normal" class="day-intro" ariaLabelledby="day-heading">
+    <div class="section-head">
+      <p class="eyebrow">{intro.eyebrow}</p>
+      <h2 id="day-heading">{intro.heading}</h2>
+      <p class="lede">{intro.lede}</p>
+    </div>
+  </Section>
+
+  {moments.map((m, i) => (
+    <section class:list={["moment", i % 2 === 1 && "moment--flip"]} data-light={m.light} id={`at-${m.slug.replace(/^\d+-/, '')}`} aria-labelledby={`h-${m.slug}`}>
+      <div class="wrap moment-grid">
+        <div class="moment-text">
+          <div class="moment-when">
+            <p class="eyebrow">{m.when}</p>
+            <button type="button" class="moment-seek" data-film-target="film" data-film-seek={m.at} aria-label={`${intro.seekLabel} ${chapterTime(m.at)}`}>
+              <svg width="9" height="11" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12l10-6z" fill="currentColor" /></svg>
+              {chapterTime(m.at)}
+            </button>
+          </div>
+          <h3 id={`h-${m.slug}`}>{m.heading}</h3>
+          <ul class="said">
+            {m.said.map((l) => (
+              <li class={l.who === 'You' ? 'said-you' : 'said-puck'}>
+                <span class="said-who">{l.who}</span>
+                {l.who === 'You' ? <q>{l.line}</q> : <p>{l.line}</p>}
+              </li>
+            ))}
+          </ul>
+          <p class="moment-body">{m.body}</p>
+          <p class="moment-house"><b>{intro.houseLabel}</b>{m.house}</p>
+        </div>
+        <div class="moment-media">
+          <figure class="still">
+            <img
+              src={`/images/film/${m.still.name}-1280.jpg`}
+              srcset={`/images/film/${m.still.name}-640.jpg 640w, /images/film/${m.still.name}-1280.jpg 1280w`}
+              sizes="(max-width: 900px) 100vw, 640px"
+              alt={m.still.alt}
+              width="1280"
+              height="720"
+              loading="lazy"
+              decoding="async"
+            />
+            <button type="button" class="still-seek" data-film-target="film" data-film-seek={m.at}>
+              <svg width="10" height="12" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12l10-6z" fill="currentColor" /></svg>
+              {intro.seekLabel} {chapterTime(m.at)}
+            </button>
+          </figure>
+          <div class="faces">
+            {m.faces.map((f) => <Face face={f} />)}
+          </div>
+        </div>
+      </div>
+    </section>
+  ))}
+</div>

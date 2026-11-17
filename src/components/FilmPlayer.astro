@@ -1,0 +1,94 @@
+---
+// The film as an ordinary <video>, behind its poster and one play button. Used in the home page's
+// hero and on /videos. Click to play, never autoplay; nothing is fetched until it is started.
+//
+// The markup works with no script: the <video> has its own controls. The script below then hides
+// them until the film has been started, so the poster is clean, and shows the play button instead.
+// Anything on the page can start or seek the film by pointing at this frame's id:
+//   <a href="#film" data-film-start="film">                 scrolls to it and plays
+//   <button data-film-seek="16" data-film-target="film">    jumps to 0:16 and plays
+import type { Film } from '../lib/films';
+import { runningTime, spokenTime } from '../lib/films';
+
+interface Props {
+  film: Film;
+  id?: string;
+}
+const { film, id } = Astro.props;
+const length = runningTime(film.seconds);
+const spoken = spokenTime(film.seconds);
+---
+<figure class="film-frame" id={id} data-film-frame>
+  <video controls preload="none" playsinline poster={film.poster} width="1920" height="1080" aria-label={`Film: ${film.title}, ${spoken}.`}>
+    <source src={film.mp4} type="video/mp4" />
+    <track kind="captions" src={film.captions} srclang="en" label="English" />
+  </video>
+  <button class="film-play" type="button" hidden data-film-play aria-label={`Play the film: ${film.title}, ${spoken}, with sound`}>
+    <span class="film-play-chip">
+      <svg width="14" height="16" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12l10-6z" fill="currentColor" /></svg>
+      <span>Play the film</span>
+      <span class="film-play-len">{length}</span>
+    </span>
+  </button>
+</figure>
+
+<script>
+  const frames = [...document.querySelectorAll<HTMLElement>('[data-film-frame]')];
+  const players = new Map<string, { start: () => void; video: HTMLVideoElement }>();
+
+  frames.forEach((frame) => {
+    const video = frame.querySelector('video');
+    const button = frame.querySelector<HTMLButtonElement>('[data-film-play]');
+    if (!video || !button) return;
+
+    video.controls = false;
+    button.hidden = false;
+    const start = () => {
+      frame.classList.add('is-started');
+      button.hidden = true;
+      video.controls = true;
+    };
+    button.addEventListener('click', () => {
+      start();
+      video.play().catch(() => {});
+    });
+    video.addEventListener('play', start, { once: true });
+    // One film at a time: starting one pauses any other on the page.
+    video.addEventListener('play', () => {
+      frames.forEach((other) => {
+        const v = other.querySelector('video');
+        if (v && v !== video) v.pause();
+      });
+    });
+    if (frame.id) players.set(frame.id, { start, video });
+  });
+
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const show = (video: HTMLVideoElement) =>
+    video.closest('figure')?.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'center' });
+
+  // Links and buttons elsewhere on the page that start the film, or jump to a part of it.
+  document.querySelectorAll<HTMLElement>('[data-film-start]').forEach((el) =>
+    el.addEventListener('click', (e) => {
+      const p = players.get(el.dataset.filmStart ?? '');
+      if (!p) return;
+      e.preventDefault();
+      p.start();
+      show(p.video);
+      p.video.play().catch(() => {});
+    }),
+  );
+  document.querySelectorAll<HTMLElement>('[data-film-seek]').forEach((el) =>
+    el.addEventListener('click', () => {
+      const p = players.get(el.dataset.filmTarget ?? '');
+      if (!p) return;
+      const to = Number(el.dataset.filmSeek) || 0;
+      p.start();
+      show(p.video);
+      // Before anything has loaded there is nothing to seek in: ask again once there is.
+      if (p.video.readyState < 1) p.video.addEventListener('loadedmetadata', () => (p.video.currentTime = to), { once: true });
+      else p.video.currentTime = to;
+      p.video.play().catch(() => {});
+    }),
+  );
+</script>

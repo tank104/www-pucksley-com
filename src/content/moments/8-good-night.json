@@ -1,0 +1,24 @@
+{
+  "order": 8,
+  "when": "Lights out",
+  "light": "out",
+  "at": 57.8,
+  "heading": "Everything off. Good night.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Everything off. Good night."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Good night."
+    }
+  ],
+  "body": "One sentence for the whole house. The music stops and the rooms go out. The heating stays on, because nobody asked for that.",
+  "house": "The rooms go out one by one, and the music with them. Only the warm floors are left.",
+  "faces": [],
+  "still": {
+    "name": "night",
+    "alt": "Lights out: the card house dark except for the terracotta glow of the heating, the puck quiet in front of it."
+  }
+}

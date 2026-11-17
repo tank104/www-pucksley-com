@@ -1,0 +1,6 @@
+{
+  "order": 9,
+  "openByDefault": false,
+  "question": "Can I add my own things?",
+  "answer": "Yes. Custom actions call a webhook or run a script with no code at all, any MCP server’s tools become Pucksley’s, and a plugin is a C# class with a few marked methods, dropped into the hub’s plugins folder."
+}

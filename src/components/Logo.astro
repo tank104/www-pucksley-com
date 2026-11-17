@@ -1,0 +1,28 @@
+---
+// The Pucksley logo, drawn from src/lib/logo.ts (made by design/logo.py, which has the rules and the
+// other marks). The mark is the puck from above; the word is "Pucksley" in Nunito Black, as outlines.
+//   <Logo />                      the lockup, for a light ground
+//   <Logo on="dark" />            for a dark ground
+//   <Logo mark height={52} />     the mark alone
+import { MARK, WORDMARK, LOCKUP } from '../lib/logo';
+
+interface Props {
+  on?: 'light' | 'dark';
+  mark?: boolean;
+  height?: number;
+  class?: string;
+}
+const { on = 'light', mark = false, height = 32, class: extra = '' } = Astro.props;
+const s = LOCKUP.markHeight / 48;
+const word = on === 'dark' ? '#F5F2EC' : '#141416';
+---
+{mark ? (
+  <svg class:list={['logo', extra]} viewBox="0 0 48 48" height={height} width={height} role="img" aria-label="Pucksley">
+    <Fragment set:html={MARK[on]} />
+  </svg>
+) : (
+  <svg class:list={['logo', extra]} viewBox={`0 0 ${LOCKUP.width} ${LOCKUP.height}`} height={height} width={Math.round((height * LOCKUP.width) / LOCKUP.height)} role="img" aria-label="Pucksley">
+    <g transform={`scale(${s})`}><Fragment set:html={MARK[on]} /></g>
+    <path transform={`translate(${LOCKUP.markHeight + LOCKUP.gap - WORDMARK.lsb} ${LOCKUP.wordY})`} d={WORDMARK.d} fill={word} />
+  </svg>
+)}

@@ -1,0 +1,42 @@
+---
+import Logo from './Logo.astro';
+import GithubIcon from './GithubIcon.astro';
+import { reader } from '../lib/content';
+import { GITHUB } from '../lib/site';
+
+const site = await reader.singletons.siteSettings.read();
+const home = await reader.singletons.home.read();
+const links: { label: string; href: string }[] = home?.footerLinks ?? [];
+const code = [
+  { label: 'Pucksley on GitHub', href: GITHUB.project },
+  { label: 'Plugin guide', href: GITHUB.plugins },
+  { label: 'Report a problem', href: GITHUB.issues },
+  { label: 'This website’s code', href: GITHUB.website },
+  { label: 'MIT licence', href: GITHUB.licence },
+];
+---
+<footer class="foot" data-surface="night">
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a class="brand" href="/#top" aria-label="Pucksley, home">
+          <Logo on="dark" height={34} />
+        </a>
+        <p class="foot-line">{site?.footerLine}</p>
+        <p class="foot-blurb">{site?.footerBlurb}</p>
+      </div>
+      <nav class="foot-links" aria-label="This site">
+        <p class="eyebrow">The site</p>
+        {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      </nav>
+      <nav class="foot-links" aria-label="The code">
+        <p class="eyebrow"><GithubIcon size={13} /> The code</p>
+        {code.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+        <a href={`mailto:${site?.contactEmail}`}>{site?.contactEmail}</a>
+      </nav>
+    </div>
+    <div class="foot-bottom">
+      <span>© {site?.year} {site?.copyright}. Open source under the MIT licence. {site?.madeIn}.</span>
+    </div>
+  </div>
+</footer>

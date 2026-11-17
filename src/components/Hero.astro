@@ -1,0 +1,34 @@
+---
+// The top of the home page: what Pucksley is in one sentence, where to start building one, and the
+// film straight under it. The film is "A day on the bench", whose moments the rest of the page follows.
+import Section from './Section.astro';
+import FilmPlayer from './FilmPlayer.astro';
+import Chapters from './Chapters.astro';
+import GithubIcon from './GithubIcon.astro';
+import { A_DAY, runningTime } from '../lib/films';
+import { GITHUB } from '../lib/site';
+
+interface Props { hero: Record<string, any> }
+const { hero } = Astro.props;
+---
+<Section surface="night" air="hero" id="top" class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">{hero.eyebrow}</p>
+    <h1>{hero.headline}</h1>
+    <p class="hero-sub">{hero.sub}</p>
+    <div class="hero-actions">
+      <a class="btn btn--lg" href={hero.ctaPrimary.href}>{hero.ctaPrimary.label}</a>
+      <a class="btn btn--lg btn--ghost" href={GITHUB.project} rel="noopener"><GithubIcon /> {hero.ctaGithub}</a>
+      <a class="playlink" href="#film" data-film-start="film">
+        <span class="playlink-icon"><svg width="11" height="13" viewBox="0 0 12 14" aria-hidden="true"><path d="M1 1v12l10-6z" fill="currentColor" /></svg></span>
+        {hero.ctaFilm} <span class="playlink-len">{runningTime(A_DAY.seconds)}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-film">
+    <FilmPlayer film={A_DAY} id="film" />
+    <Chapters film={A_DAY} target="film" />
+    <p class="film-caption">{hero.filmCaption}</p>
+  </div>
+</Section>

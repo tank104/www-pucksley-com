@@ -1,0 +1,24 @@
+---
+// "What it runs": the hub's plugins, one card each, with where each does its work.
+import Section from './Section.astro';
+import type { Plugin } from '../lib/content';
+
+interface Props { runs: Record<string, any>; plugins: Plugin[] }
+const { runs, plugins } = Astro.props;
+---
+<Section surface="deep" air="normal" id="runs" ariaLabelledby="runs-heading">
+  <div class="section-head">
+    <p class="eyebrow">{runs.eyebrow}</p>
+    <h2 id="runs-heading">{runs.heading}</h2>
+    <p class="lede">{runs.lede}</p>
+  </div>
+  <div class="runs-grid">
+    {plugins.map((p) => (
+      <article class="run-card">
+        <span class="run-where" data-where={p.where}>{p.where}</span>
+        <h3>{p.title}</h3>
+        <p>{p.body}</p>
+      </article>
+    ))}
+  </div>
+</Section>

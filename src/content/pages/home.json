@@ -1,0 +1,177 @@
+{
+  "hero": {
+    "eyebrow": "Open source · MIT licence",
+    "headline": "A voice assistant you can hold.",
+    "sub": "A round puck for the kitchen bench. Tap it and ask: it answers out loud, and it runs the house. The music, the TV, the lamps, the heating, even the PC. Build one yourself: the puck, the hub and its plugins are all on GitHub.",
+    "ctaPrimary": {
+      "label": "Build your own",
+      "href": "/get-started/"
+    },
+    "ctaGithub": "View on GitHub",
+    "ctaFilm": "Play the film",
+    "filmCaption": "A day on the bench: one shot, from first light to lights out. With sound, and captions."
+  },
+  "day": {
+    "eyebrow": "A day on the bench",
+    "heading": "Somebody talks to it all day. The house answers in light.",
+    "lede": "The film is one shot of one day. Nothing in the card house has any colour until it does something: yellow for music, blue-white for screens, a warm lamp, terracotta for the heating. Here is the day again, a moment at a time, with what was on the puck’s screen.",
+    "seekLabel": "Play from",
+    "houseLabel": "In the house"
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "heading": "Tap, talk, turn.",
+    "lede": "The puck has a touch screen, but you hardly need it. The whole puck is the button, and the whole puck is the dial.",
+    "items": [
+      {
+        "title": "Tap it, or pick it up, and talk",
+        "body": "It listens until you stop, and shows your words as you say them. Talk over it to interrupt; after an answer it waits a moment for your reply.",
+        "face": {
+          "name": "puck",
+          "alt": "The puck on the kitchen bench, in the film, its screen showing two yellow bars."
+        }
+      },
+      {
+        "title": "Turn it",
+        "body": "Turn the puck itself: the volume while it talks or plays, Yes or No when it asks, minutes on a new timer.",
+        "face": {
+          "name": "volume",
+          "alt": "The puck's volume face, at 42."
+        }
+      },
+      {
+        "title": "Swipe between faces",
+        "body": "Home shows what is playing. Controls has the dials and switches you use most. The side button picks a face; hold it to switch off.",
+        "face": {
+          "name": "sonos",
+          "alt": "The puck's Controls face: the Kitchen Sonos at 35%."
+        }
+      },
+      {
+        "title": "Set things by hand",
+        "body": "Turn to set the minutes, tap to start. Timers set on the puck work with no hub at all.",
+        "face": {
+          "name": "timer-new",
+          "alt": "The puck's New timer face: 10 minutes, turn to set, tap to start."
+        }
+      }
+    ]
+  },
+  "runs": {
+    "eyebrow": "What it runs",
+    "heading": "One puck, the whole house.",
+    "lede": "Everything the puck can do comes from plugins on the hub. These come with it, and each card says where it does its work."
+  },
+  "hub": {
+    "eyebrow": "Where it thinks",
+    "heading": "A puck on the bench, a hub in the cupboard.",
+    "lede": "The puck listens, speaks and shows. The thinking happens on a hub at home, which asks Claude what you meant and then does it, on your own network.",
+    "nodes": [
+      {
+        "name": "The puck",
+        "where": "On the bench",
+        "body": "Microphones, a speaker, a round screen. Joins your Wi‑Fi and finds the hub by itself."
+      },
+      {
+        "name": "The hub",
+        "where": "On a NAS, or the PC",
+        "body": "Runs around the clock in Docker, or as a small app in the PC’s tray. Finds the speakers, TVs and plugs."
+      },
+      {
+        "name": "Claude",
+        "where": "In the cloud",
+        "body": "Works out what you asked for and which tools will do it, and searches the web when it needs to."
+      }
+    ],
+    "points": [
+      {
+        "title": "No hub, still an assistant",
+        "body": "If the hub is off, the puck still answers questions on its own, talking to Claude directly. The house waits until the hub is back."
+      },
+      {
+        "title": "Your choice of ears and voice",
+        "body": "Hearing can run on the hub itself, or through a speech service. Answers come in the voice you pick; the puck’s own is Annette, an Australian voice."
+      },
+      {
+        "title": "Set up from your phone",
+        "body": "A new puck opens its own Wi‑Fi network and shows a QR code. Give it yours, then approve it on the hub’s page with the three digits on its screen."
+      },
+      {
+        "title": "A puck in every room",
+        "body": "Each puck has a name and a room, so “turn it down a bit” from the kitchen means the kitchen."
+      }
+    ]
+  },
+  "build": {
+    "eyebrow": "Build your own",
+    "heading": "One board, one hub, one key.",
+    "lede": "Everything Pucksley is, is on GitHub. A puck is a Waveshare board flashed with its firmware; the hub runs in Docker or on a Windows PC; Claude needs your Anthropic API key.",
+    "steps": [
+      {
+        "title": "Get the board",
+        "body": "A Waveshare ESP32-S3-Touch-AMOLED-1.75C: the round screen, the microphones, the speaker and the battery, all on one board."
+      },
+      {
+        "title": "Run the hub",
+        "body": "On a NAS or a Linux box in Docker, or as a tray app on a Windows PC. Its page opens at port 8765.",
+        "code": "docker compose \\n  -f hub/docker-compose.yml \\n  up -d --build"
+      },
+      {
+        "title": "Flash the puck",
+        "body": "With ESP-IDF 5.5, over USB.",
+        "code": "cd firmware\nidf.py set-target esp32s3\nidf.py -p COM5 flash"
+      },
+      {
+        "title": "Join it up",
+        "body": "The puck opens its own Wi‑Fi network and shows a QR code. Give it yours, approve it on the hub’s page, and add your Anthropic key."
+      }
+    ],
+    "cta": "The full instructions"
+  },
+  "faqIntro": {
+    "eyebrow": "Questions",
+    "heading": "Where it is up to, and how it works."
+  },
+  "access": {
+    "heading": "Rather have one ready-made?",
+    "lede": "We are planning a Kickstarter for a finished puck, case and all. Leave your email and we will write once, when it opens.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@example.com",
+    "submitLabel": "Let me know",
+    "fineprint": "One email, when the Kickstarter opens. No newsletter.",
+    "privacyLabel": "What we keep",
+    "confirmationTitle": "You are on the list.",
+    "confirmationBody": "We will write once, when the Kickstarter opens.",
+    "errorMessage": "That did not go through. Please try again, or write to us instead."
+  },
+  "footerLinks": [
+    {
+      "label": "A day",
+      "href": "/#day"
+    },
+    {
+      "label": "How it works",
+      "href": "/#how"
+    },
+    {
+      "label": "What it runs",
+      "href": "/#runs"
+    },
+    {
+      "label": "Build your own",
+      "href": "/get-started/"
+    },
+    {
+      "label": "Questions",
+      "href": "/#questions"
+    },
+    {
+      "label": "The film",
+      "href": "/videos/"
+    },
+    {
+      "label": "Privacy",
+      "href": "/privacy/"
+    }
+  ]
+}

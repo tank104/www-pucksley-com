@@ -1,0 +1,6 @@
+{
+  "order": 4,
+  "openByDefault": false,
+  "question": "Is it always listening?",
+  "answer": "No. It listens when you tap it or pick it up, and stops when you stop talking. After an answer it listens for a few seconds in case you reply, and then goes quiet by itself."
+}

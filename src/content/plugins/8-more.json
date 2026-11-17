@@ -1,0 +1,6 @@
+{
+  "order": 8,
+  "title": "Anything else",
+  "where": "The hub",
+  "body": "Custom actions that call a webhook or run a script without code, the tools of any MCP server, or a plugin of your own: a C# class with a few marked methods."
+}

@@ -1,0 +1,29 @@
+{
+  "order": 6,
+  "when": "Night",
+  "light": "night",
+  "at": 44.8,
+  "heading": "Half a degree warmer.",
+  "said": [
+    {
+      "who": "You",
+      "line": "Turn the heating up half a degree."
+    },
+    {
+      "who": "Pucksley",
+      "line": "Twenty-one and a half."
+    }
+  ],
+  "body": "The heating too: up or down by half a degree, or one room at a time, through Home Assistant or a heating controller that has its own web API.",
+  "house": "Terracotta spreads under every floor, a room at a time.",
+  "faces": [
+    {
+      "name": "heating",
+      "alt": "The puck's Controls face: House heating at 21.5 °C, with a terracotta arc."
+    }
+  ],
+  "still": {
+    "name": "heating",
+    "alt": "At night the card house glows: terracotta floors in every room, yellow where the music plays."
+  }
+}

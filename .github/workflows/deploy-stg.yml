@@ -1,0 +1,164 @@
+name: Deploy stg
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-stg-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+jobs:
+  # ------------------------------------------------------------------
+  # Build on every push and PR, forks included. No Azure needed: the
+  # type check and the build.
+  # ------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  # ------------------------------------------------------------------
+  # On a PR from this repository: preview infra changes against stg via
+  # az deployment what-if. PRs from forks skip it: they get no Azure
+  # sign-in (GitHub gives fork PRs no OIDC token in any case).
+  # ------------------------------------------------------------------
+  what-if:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment: stg
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: What-if against stg
+        run: |
+          az deployment group what-if \
+            --resource-group pk-www-stg \
+            --template-file infra/main.bicep \
+            --parameters infra/stg.bicepparam \
+            --name whatif-${{ github.run_id }}
+
+  # ------------------------------------------------------------------
+  # stg: deploys on every push to main. No approval gate.
+  # ------------------------------------------------------------------
+  stg-infra:
+    if: github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    environment: stg
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+    outputs:
+      swaName: ${{ steps.deploy.outputs.swaName }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy Bicep
+        id: deploy
+        run: |
+          az deployment group create \
+            --resource-group pk-www-stg \
+            --template-file infra/main.bicep \
+            --parameters infra/stg.bicepparam \
+            --name stg-${{ github.run_id }}
+          swaName=$(az deployment group show \
+            --resource-group pk-www-stg \
+            --name stg-${{ github.run_id }} \
+            --query properties.outputs.swaName.value -o tsv)
+          echo "swaName=${swaName}" >> "$GITHUB_OUTPUT"
+          customHostname=$(az deployment group show \
+            --resource-group pk-www-stg \
+            --name stg-${{ github.run_id }} \
+            --query properties.outputs.customHostname.value -o tsv)
+          echo "customHostname=${customHostname}" >> "$GITHUB_OUTPUT"
+
+      - name: Register custom domain (non-blocking)
+        if: steps.deploy.outputs.customHostname != ''
+        run: |
+          # Registered with --no-wait so cname-delegation validation runs
+          # asynchronously in Azure and never blocks (and outlives) the
+          # OIDC-authed deploy. `|| true` keeps re-runs idempotent once Ready,
+          # and keeps the deploy green until the domain is delegated.
+          az staticwebapp hostname set \
+            --name ${{ steps.deploy.outputs.swaName }} \
+            --resource-group pk-www-stg \
+            --hostname ${{ steps.deploy.outputs.customHostname }} \
+            --validation-method cname-delegation \
+            --no-wait || true
+
+  stg-app:
+    needs: stg-infra
+    runs-on: ubuntu-latest
+    environment: stg
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Azure login
+        uses: azure/login@v3
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Fetch SWA deployment token
+        id: token
+        run: |
+          token=$(az staticwebapp secrets list \
+            --name ${{ needs.stg-infra.outputs.swaName }} \
+            --resource-group pk-www-stg \
+            --query properties.apiKey -o tsv)
+          echo "::add-mask::${token}"
+          echo "token=${token}" >> "$GITHUB_OUTPUT"
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - name: Build site
+        # Canonical links, the sitemap and share pictures point at staging's
+        # own address, so a shared staging link never claims to be www.
+        env:
+          SITE_URL: https://stg-www.pucksley.com
+        run: |
+          npm ci
+          npm run build
+      - name: Deploy SWA content
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.token.outputs.token }}
+          action: upload
+          app_location: dist
+          api_location: api
+          skip_app_build: true

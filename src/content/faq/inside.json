@@ -1,0 +1,6 @@
+{
+  "order": 8,
+  "openByDefault": false,
+  "question": "What's inside the puck?",
+  "answer": "The Waveshare ESP32-S3-Touch-AMOLED-1.75C: a round 1.75-inch touch screen, microphones, a speaker, a motion sensor that knows when it is turned or picked up, a side button and a battery. A case of its own is still being designed: the puck in the film is a render."
+}
