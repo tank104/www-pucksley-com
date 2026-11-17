@@ -52,18 +52,83 @@ jobs:
             --name prd-${{ github.run_id }} \
             --query properties.outputs.customHostname.value -o tsv)
           echo "customHostname=${customHostname}" >> "$GITHUB_OUTPUT"
+          apexHostname=$(az deployment group show \
+            --resource-group pk-www-prd \
+            --name prd-${{ github.run_id }} \
+            --query properties.outputs.apexHostname.value -o tsv)
+          echo "apexHostname=${apexHostname}" >> "$GITHUB_OUTPUT"
 
       - name: Register custom domain (non-blocking)
         if: steps.deploy.outputs.customHostname != ''
+        env:
+          SWA: ${{ steps.deploy.outputs.swaName }}
+          HOST: ${{ steps.deploy.outputs.customHostname }}
         run: |
           # See deploy-stg.yml: registered async so validation never blocks
-          # (and outlives) the OIDC-authed deploy. `|| true` keeps re-runs clean.
-          az staticwebapp hostname set \
-            --name ${{ steps.deploy.outputs.swaName }} \
-            --resource-group pk-www-prd \
-            --hostname ${{ steps.deploy.outputs.customHostname }} \
-            --validation-method cname-delegation \
-            --no-wait || true
+          # (and outlives) the OIDC-authed deploy. Registered once only: doing
+          # it again would unset www as the default domain (the step below).
+          status=$(az staticwebapp hostname show --name "$SWA" --resource-group pk-www-prd \
+            --hostname "$HOST" --query status -o tsv 2>/dev/null || true)
+          if [ -z "$status" ]; then
+            az staticwebapp hostname set --name "$SWA" --resource-group pk-www-prd \
+              --hostname "$HOST" --validation-method cname-delegation --no-wait || true
+          fi
+          echo "$HOST: ${status:-registered}"
+
+      - name: Register apex domain (non-blocking)
+        if: steps.deploy.outputs.apexHostname != ''
+        env:
+          SWA: ${{ steps.deploy.outputs.swaName }}
+          APEX: ${{ steps.deploy.outputs.apexHostname }}
+        run: |
+          # An apex cannot be a CNAME, so it proves ownership with a TXT token
+          # at `@` instead (Bicep has already pointed its alias A record at the
+          # SWA). Registered once: a Ready or validating domain is left alone.
+          status=$(az staticwebapp hostname show --name "$SWA" --resource-group pk-www-prd \
+            --hostname "$APEX" --query status -o tsv 2>/dev/null || true)
+          if [ -z "$status" ]; then
+            az staticwebapp hostname set --name "$SWA" --resource-group pk-www-prd \
+              --hostname "$APEX" --validation-method dns-txt-token --no-wait || true
+          fi
+          # Publish the token in the zone if it is not there yet. SWA issues it
+          # a few seconds after registration.
+          token=''
+          for i in $(seq 1 24); do
+            token=$(az staticwebapp hostname show --name "$SWA" --resource-group pk-www-prd \
+              --hostname "$APEX" --query validationToken -o tsv 2>/dev/null || true)
+            [ -n "$token" ] && break
+            [ "$status" = "Ready" ] && break
+            sleep 5
+          done
+          if [ -n "$token" ]; then
+            have=$(az network dns record-set txt show --resource-group global --zone-name "$APEX" \
+              --name @ --query "TXTRecords[].value[]" -o tsv 2>/dev/null || true)
+            if ! grep -qx "$token" <<< "$have"; then
+              az network dns record-set txt add-record --resource-group global --zone-name "$APEX" \
+                --record-set-name @ --value "$token" --output none
+            fi
+          fi
+          echo "$APEX: ${status:-registered}"
+
+      - name: Make www the default domain
+        if: steps.deploy.outputs.customHostname != ''
+        env:
+          SWA: ${{ steps.deploy.outputs.swaName }}
+          HOST: ${{ steps.deploy.outputs.customHostname }}
+        run: |
+          # The portal's "Set default": SWA then 301s every other hostname (the
+          # apex, the azurestaticapps.net address) to www. az has no command for
+          # it, so it goes through the REST API. Azure takes it only once www is
+          # Ready; before that the next deploy does it.
+          url="https://management.azure.com/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/pk-www-prd/providers/Microsoft.Web/staticSites/${SWA}/customDomains/${HOST}?api-version=2024-04-01"
+          read -r status isDefault < <(az rest --method get --url "$url" \
+            --query "[properties.status, properties.isDefault]" -o tsv 2>/dev/null | paste -sd' ') || true
+          if [ "$status" = "Ready" ] && [ "$isDefault" != "true" ]; then
+            az rest --method put --url "$url" --output none \
+              --body '{"properties":{"validationMethod":"cname-delegation","isDefault":true}}' || true
+            isDefault=true
+          fi
+          echo "$HOST: ${status:-not registered}, default=${isDefault:-false}"
 
   prd-app:
     needs: prd-infra

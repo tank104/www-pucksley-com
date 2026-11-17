@@ -53,5 +53,6 @@ resource swaSettings 'Microsoft.Web/staticSites/config@2023-12-01' = {
   }
 }
 
+output id string = swa.id
 output name string = swa.name
 output defaultHostname string = swa.properties.defaultHostname
