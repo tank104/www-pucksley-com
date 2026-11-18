@@ -91,19 +91,26 @@ shape as the sibling sites, with a `pk-*` naming convention, in the owner's Pers
 |---|---|---|
 | Resource group | `pk-www-stg` | `pk-www-prd` |
 | Static Web App | `pk-stg-www-swa-ae` (eastasia) | `pk-prd-www-swa-ae` (eastasia) |
-| Custom hostname | `stg-www.pucksley.com` | `www.pucksley.com` |
+| Custom hostname | `stg-www.pucksley.com` | `www.pucksley.com` (the default: `pucksley.com` and the `azurestaticapps.net` address redirect to it) |
 | Deploy trigger | push to `main` | by hand (Actions, Deploy prd, Run workflow), from `main` only |
 | GitHub Environment | `stg` | `prd` |
 | OIDC app registration | `pk-www-stg-github` | `pk-www-prd-github` |
 
 Each environment's Bicep (`infra/main.bicep`) makes the Static Web App, App Insights, the storage table the email form
-writes to (`api/waitlist`), and its own CNAME in the pucksley.com zone.
+writes to (`api/waitlist`), and its own CNAME in the pucksley.com zone. prd also points the bare `pucksley.com` at its
+Static Web App, with an Azure DNS alias record (an apex cannot be a CNAME).
+
+The workflows then register each hostname on its Static Web App, once, without waiting: Azure validates it and issues
+the certificate in the background. `www` and `stg-www` validate by their CNAME. The apex validates by a token, which
+the prd workflow publishes as a TXT record at `@`. Last, the prd workflow makes `www` the Static Web App's default
+domain, so every other hostname redirects there (301). Registering `www` again would undo that, which is why each
+hostname is registered only once.
 
 **The zone** is an Azure DNS zone in the Personal subscription's `global` resource group, made by `infra/zone.bicep`.
-The domain is registered at OnlyDomains; until its nameservers point at the zone's
-(`az network dns zone show -g global -n pucksley.com --query nameServers`), the custom hostnames do not answer and the
-sites are only at their `azurestaticapps.net` addresses. There is no apex record yet: once www.pucksley.com is live,
-point `pucksley.com` at it.
+The domain is registered at OnlyDomains, with its nameservers set to the zone's
+(`az network dns zone show -g global -n pucksley.com --query nameServers`). The zone file holds only what is not the
+website's: pucksley.com has no email, so it publishes a null MX and a DMARC `p=reject`, and no one can send mail as
+it. The website's records (`www`, `stg-www`, the apex A and TXT records) are written by the pipelines above.
 
 **The identities.** `infra/bootstrap.ps1` makes everything the workflows stand on, and can be run again safely: the
 zone, the two resource groups, an app registration per environment with a federated credential for that GitHub
@@ -113,7 +120,9 @@ repository's `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` variables and each en
 limits the `prd` environment to `main`.
 
 Pull requests from this repository run the build and a what-if against stg. Pull requests from forks run the build
-only: they get no Azure sign-in. `main` is protected (pull request needed, no force-push or deletion, `test` must pass).
+only: they get no Azure sign-in. `main` is protected: changes arrive by pull request, `test` must pass, and a pull
+request needs an approval from the code owner ([`.github/CODEOWNERS`](.github/CODEOWNERS)). No force-pushes or
+deletion.
 
 ## Contributing
 

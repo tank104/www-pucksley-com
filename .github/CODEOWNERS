@@ -1,0 +1,3 @@
+# Every pull request needs the code owner's approval before it can merge into main
+# (the "Protect main" ruleset requires a code-owner review).
+* @tank104

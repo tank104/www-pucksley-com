@@ -29,6 +29,9 @@ param swaSku string = 'Free'
 @description('Public custom hostname for the SWA (e.g. www.pucksley.com). Empty = no custom domain, SWA uses default hostname only.')
 param customHostname string = ''
 
+@description('The bare domain (pucksley.com) to point at this SWA as well, or empty. prd only: there is one apex.')
+param apexHostname string = ''
+
 @description('Resource group hosting the pucksley.com DNS zone (infra/zone.bicep). The env deployment cross-RG-writes its CNAME into this RG.')
 param dnsResourceGroup string = 'global'
 
@@ -76,6 +79,17 @@ module dnsRecord 'modules/dns-cname.bicep' = if (!empty(customHostname)) {
   }
 }
 
+// Cross-RG: the apex as an alias A record onto this SWA (prd only). Its ownership TXT record is written
+// by the workflow, which is where the token first exists.
+module dnsApex 'modules/dns-apex.bicep' = if (!empty(apexHostname)) {
+  scope: resourceGroup(dnsResourceGroup)
+  name: 'dns-${env}-apex'
+  params: {
+    zoneName: apexHostname
+    swaId: swa.outputs.id
+  }
+}
+
 // NOTE: the SWA customDomain registration is intentionally NOT done here.
 // cname-delegation validation can poll for ~an hour on first creation, which
 // outlives the GitHub OIDC credential the deploy runs under (the federated
@@ -87,3 +101,4 @@ module dnsRecord 'modules/dns-cname.bicep' = if (!empty(customHostname)) {
 output swaName string = swa.outputs.name
 output swaHostname string = swa.outputs.defaultHostname
 output customHostname string = customHostname
+output apexHostname string = apexHostname

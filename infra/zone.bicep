@@ -1,15 +1,15 @@
 // The pucksley.com DNS zone, in the `global` resource group of the owner's Personal subscription.
 // Made once by infra/bootstrap.ps1, and safe to deploy again.
 //
-// Ownership: this file owns the zone itself and any record that is not the website's. `www` and
-// `stg-www` belong to the site's own pipeline (infra/main.bicep, modules/dns-cname.bicep), which writes
-// them on every deploy; do not declare them here. Deploy this file in Incremental mode only (the
-// default): Complete mode would delete those records.
+// Ownership: this file owns the zone itself and the records that are not the website's (the mail records
+// below). The website's records belong to its own pipeline, which writes them on every deploy; do not
+// declare them here:
+//   - `www` and `stg-www` CNAMEs (infra/main.bicep, modules/dns-cname.bicep)
+//   - the apex `@` A record, an alias onto the prd Static Web App (modules/dns-apex.bicep)
+//   - the apex `@` TXT record holding the Static Web App's ownership token (.github/workflows/deploy-prd.yml)
+// Deploy this file in Incremental mode only (the default): Complete mode would delete those records.
 //
-// The domain is registered at OnlyDomains. Point its nameservers at the ones this deployment outputs.
-//
-// No apex record yet: once www.pucksley.com is live, add `pucksley.com` itself (an ALIAS to the prd
-// Static Web App, and the SWA's apex custom domain), so the bare domain answers too.
+// The domain is registered at OnlyDomains, with its nameservers set to the ones this deployment outputs.
 
 targetScope = 'resourceGroup'
 
@@ -18,6 +18,40 @@ resource zone 'Microsoft.Network/dnsZones@2018-05-01' = {
   location: 'global'
   tags: {
     project: 'pucksley'
+  }
+}
+
+// pucksley.com sends and receives no email (the site's contact address is elsewhere). These say so, so
+// nobody can send mail that passes as @pucksley.com: a null MX (RFC 7505) accepts none, and DMARC tells
+// receivers to reject anything claiming to be from the domain. (No SPF record: the apex TXT record set
+// belongs to the site's pipeline; null MX and DMARC reject cover it.) To start using email on the domain,
+// replace the MX and loosen DMARC.
+resource nullMx 'Microsoft.Network/dnsZones/MX@2018-05-01' = {
+  parent: zone
+  name: '@'
+  properties: {
+    TTL: 3600
+    MXRecords: [
+      {
+        preference: 0
+        exchange: '.'
+      }
+    ]
+  }
+}
+
+resource dmarc 'Microsoft.Network/dnsZones/TXT@2018-05-01' = {
+  parent: zone
+  name: '_dmarc'
+  properties: {
+    TTL: 3600
+    TXTRecords: [
+      {
+        value: [
+          'v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s'
+        ]
+      }
+    ]
   }
 }
 
