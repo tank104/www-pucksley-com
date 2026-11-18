@@ -2,5 +2,5 @@
   "order": 2,
   "openByDefault": false,
   "question": "Can I buy one?",
-  "answer": "Not ready-made, yet. You can build one today: the puck is a Waveshare ESP32-S3 board with a round AMOLED screen, flashed with Pucksley’s firmware. We are planning a Kickstarter for a ready-made puck; leave your email at the bottom of this page to hear when it opens."
+  "answer": "Not ready-made, yet. You can build one today: the puck is a Waveshare ESP32-S3 board with a round AMOLED screen, flashed with Pucksley’s firmware. We would like to make a ready-made one; leave your email at the bottom of this page and we will write once if we do."
 }

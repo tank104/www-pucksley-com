@@ -48,5 +48,5 @@ bash film/blender/film_hd.sh       # the 1080p film: about six hours of renderin
 python film/web.py --redo          # then the site's copies
 ```
 
-The film's own screens come from the Pucksley repository: `firmware/tools/sim/build/sim.exe film` draws them into
-`firmware/tools/sim/out/film_*.png` (the `film` mode is on the `tank104/Create-Video` branch, not yet in `main`).
+The film's own screens (`screens/31` to `35`) were drawn by a one-off `film` mode in the Pucksley repository's
+simulator, made for the film and not kept; they are here as pictures only.
