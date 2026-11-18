@@ -91,7 +91,9 @@ jobs:
               --hostname "$APEX" --validation-method dns-txt-token --no-wait || true
           fi
           # Publish the token in the zone if it is not there yet. SWA issues it
-          # a few seconds after registration.
+          # a few seconds after registration. A new token (a Static Web App
+          # made again) must also be copied into infra/zone.bicep's apexTxt,
+          # or the next zone deploy removes it.
           token=''
           for i in $(seq 1 24); do
             token=$(az staticwebapp hostname show --name "$SWA" --resource-group pk-www-prd \
