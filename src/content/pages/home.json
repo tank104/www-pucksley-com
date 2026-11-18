@@ -134,14 +134,14 @@
   },
   "access": {
     "heading": "Rather have one ready-made?",
-    "lede": "We are planning a Kickstarter for a finished puck, case and all. Leave your email and we will write once, when it opens.",
+    "lede": "We would like to make a finished puck, case and all. Leave your email and we will write once, if we do.",
     "emailLabel": "Email address",
     "emailPlaceholder": "you@example.com",
     "submitLabel": "Let me know",
-    "fineprint": "One email, when the Kickstarter opens. No newsletter.",
+    "fineprint": "One email, if there is a ready-made puck. No newsletter.",
     "privacyLabel": "What we keep",
     "confirmationTitle": "You are on the list.",
-    "confirmationBody": "We will write once, when the Kickstarter opens.",
+    "confirmationBody": "We will write once, if there is a ready-made puck.",
     "errorMessage": "That did not go through. Please try again, or write to us instead."
   },
   "footerLinks": [
