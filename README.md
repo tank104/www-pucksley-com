@@ -102,15 +102,17 @@ Static Web App, with an Azure DNS alias record (an apex cannot be a CNAME).
 
 The workflows then register each hostname on its Static Web App, once, without waiting: Azure validates it and issues
 the certificate in the background. `www` and `stg-www` validate by their CNAME. The apex validates by a token, which
-the prd workflow publishes as a TXT record at `@`. Last, the prd workflow makes `www` the Static Web App's default
+the prd workflow publishes as a TXT record at `@` (and which is then kept in `infra/zone.bicep`). Last, the prd workflow makes `www` the Static Web App's default
 domain, so every other hostname redirects there (301). Registering `www` again would undo that, which is why each
 hostname is registered only once.
 
 **The zone** is an Azure DNS zone in the Personal subscription's `global` resource group, made by `infra/zone.bicep`.
 The domain is registered at OnlyDomains, with its nameservers set to the zone's
-(`az network dns zone show -g global -n pucksley.com --query nameServers`). The zone file holds only what is not the
-website's: pucksley.com has no email, so it publishes a null MX and a DMARC `p=reject`, and no one can send mail as
-it. The website's records (`www`, `stg-www`, the apex A and TXT records) are written by the pipelines above.
+(`az network dns zone show -g global -n pucksley.com --query nameServers`). The zone file holds what is not the
+website's: every TXT value at `@` (Google Search Console's verification, the Static Web App's apex token, SPF), and,
+since pucksley.com has no email, a null MX and a DMARC `p=reject`, so no one can send mail as it. The website's own
+records (`www`, `stg-www`, the apex A record) are written by the pipelines above. CI does not deploy the zone file:
+after changing it, run `az deployment group create -g global --template-file infra/zone.bicep --subscription Personal`.
 
 **The identities.** `infra/bootstrap.ps1` makes everything the workflows stand on, and can be run again safely: the
 zone, the two resource groups, an app registration per environment with a federated credential for that GitHub
