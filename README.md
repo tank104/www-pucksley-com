@@ -120,9 +120,9 @@ repository's `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` variables and each en
 limits the `prd` environment to `main`.
 
 Pull requests from this repository run the build and a what-if against stg. Pull requests from forks run the build
-only: they get no Azure sign-in. `main` is protected: changes arrive by pull request, `test` must pass, and a pull
-request needs an approval from the code owner ([`.github/CODEOWNERS`](.github/CODEOWNERS)). No force-pushes or
-deletion.
+only: they get no Azure sign-in. `main` is protected: changes arrive by pull request, `test` must pass, and there are
+no force-pushes or deletion. Only the maintainer can merge, and every pull request asks them for a review
+([`.github/CODEOWNERS`](.github/CODEOWNERS)).
 
 ## Contributing
 
