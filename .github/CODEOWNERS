@@ -1,3 +1,3 @@
-# Every pull request needs the code owner's approval before it can merge into main
-# (the "Protect main" ruleset requires a code-owner review).
+# Pull requests ask @tank104 for a review. Only collaborators with write access
+# (just @tank104) can merge, so nothing reaches main without them.
 * @tank104
