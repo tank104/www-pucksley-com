@@ -27,11 +27,11 @@ const toc = [
 const cmd = {
   clone: 'git clone https://github.com/tank104/Pucksley.git\ncd Pucksley',
   docker: 'docker compose -f hub/docker-compose.yml up -d --build',
+  windowsInstall: 'irm https://raw.githubusercontent.com/tank104/Pucksley/main/scripts/install.ps1 | iex',
   tray: 'dotnet run --project hub/src/Hosts/Pucksley.Tray',
-  trayBuild: './scripts/build.ps1\ndist/Pucksley/Pucksley.exe',
-  linux: './scripts/build.sh --hub-only\ndist/pucksley/pucksley',
-  linuxInstall: './scripts/build.sh --hub-only --install',
-  linuxUpdate: 'git pull --ff-only && ./scripts/build.sh --hub-only --install',
+  linuxInstall: 'curl -fsSL https://raw.githubusercontent.com/tank104/Pucksley/main/scripts/install.sh | bash',
+  linuxFirewall: 'sudo ufw allow from 192.168.0.0/16 to any port 8765 proto tcp',
+  linuxSource: './scripts/build.sh --hub-only --install',
   flash: 'cd firmware\nidf.py set-target esp32s3        # once\nidf.py -p COM5 flash             # your port; hold BOOT while plugging in if it will not enter download mode',
   backup: 'python -m esptool --chip esp32s3 --port COM5 read_flash 0 0x1000000 board-backup.bin',
   build:
@@ -97,6 +97,10 @@ const plugins: [string, string, string][] = [
         </ul>
 
         <h2 id="code">1. Get the code</h2>
+        <p>
+          For the puck’s firmware, the hub in Docker, or building anything yourself. On a Windows or Linux PC the hub needs none of it:
+          one line installs the latest release (step 2).
+        </p>
         <pre class="code"><code set:text={cmd.clone} /></pre>
 
         <h2 id="hub">2. Run the hub</h2>
@@ -108,33 +112,44 @@ const plugins: [string, string, string][] = [
           Container Manager. The container has everything except the plugins that control a PC.
         </p>
         <h3>On a Windows PC</h3>
+        <p>In PowerShell:</p>
+        <pre class="code"><code set:text={cmd.windowsInstall} /></pre>
+        <p>
+          That downloads the <a class="textlink" href={GITHUB.releases} rel="noopener">latest release</a>, installs it with a Start menu
+          entry and starts it. Nothing else to install: it brings its own .NET. A tray icon appears and the hub’s page opens at
+          <code>http://127.0.0.1:8765</code>; from another computer, use the link with <code>?key=</code> that the tray menu and the log
+          show. Tick <strong>Start with Windows</strong> in the tray menu to have it there every time, and allow it through Windows
+          Firewall on private networks when Windows asks, so the pucks can reach it.
+        </p>
+        <p>
+          To update, run the same line again: it stops the hub, swaps the new copy in and starts it, and your settings stay. Rather not
+          paste a script? Download <code>Pucksley-windows-x64.zip</code> from the release, unpack it somewhere to keep and run
+          <code>Pucksley.exe</code>. From the code instead:
+        </p>
         <pre class="code"><code set:text={cmd.tray} /></pre>
-        <p>Or build it once and run the app:</p>
-        <pre class="code"><code set:text={cmd.trayBuild} /></pre>
-        <p>
-          A tray icon appears and the hub’s page opens at <code>http://127.0.0.1:8765</code>. From another computer, use the link with
-          <code>?key=</code> that the tray menu and the log show.
-        </p>
+
         <h3>On a Linux PC</h3>
-        <pre class="code"><code set:text={cmd.linux} /></pre>
-        <p>
-          Nothing else to install: the build brings its own .NET. The same tray icon appears wherever the desktop has a tray (KDE Plasma,
-          Hyprland and Omarchy, Waybar and Sway bars, Xfce, Cinnamon, and GNOME with the AppIndicator extension), and the page opens at
-          the same address. Without a tray the hub runs all the same.
-        </p>
-        <p>To build it, copy it to <code>~/.local/share/pucksley</code> and put it in the app launcher in one go:</p>
         <pre class="code"><code set:text={cmd.linuxInstall} /></pre>
         <p>
-          The tray menu’s <strong>Start at login</strong> starts it with the desktop. To update, from a checkout of <code>main</code>
-          (settings are kept, in <code>~/.config/pucksley</code>):
+          That downloads the latest release (x86-64 or ARM64), installs it in <code>~/.local/share/pucksley</code> and the app launcher,
+          and starts it. Nothing else to install: it brings its own .NET. The same tray icon appears wherever the desktop has a tray (KDE
+          Plasma, Hyprland and Omarchy, Waybar and Sway bars, Xfce, Cinnamon, and GNOME with the AppIndicator extension; on Omarchy it
+          sits behind the bar’s ‹ until you pin it), and the page opens at the same address. Without a tray the hub runs all the same.
         </p>
-        <pre class="code"><code set:text={cmd.linuxUpdate} /></pre>
         <p>
-          If a firewall is on, let the pucks in: <code>sudo ufw allow 8765/tcp</code>. Some of the PC’s tools need a small program
-          (<code>grim</code> for screenshots, <code>wtype</code> for typing, and so on); whatever is missing turns off just that tool, and
-          Claude says what to install. So far it has only been run on Omarchy (Hyprland); KDE, GNOME, Sway and X11 desktops are written to
-          their documented interfaces but untried. The <a class="textlink" href={GITHUB.linux} rel="noopener">Linux notes</a> have what
-          works on which desktop, and how to move your settings over from the Windows app.
+          Tick <strong>Start at login</strong> in the tray menu to start it with the desktop; where the desktop runs on systemd (Omarchy,
+          GNOME, KDE) that also starts it again if it ever crashes. To update, run the same line again: settings stay, in
+          <code>~/.config/pucksley</code>. If a firewall is on (Omarchy turns one on), let the pucks in:
+        </p>
+        <pre class="code"><code set:text={cmd.linuxFirewall} /></pre>
+        <p>From the code instead (it installs the same way; <code>git pull</code> first to update):</p>
+        <pre class="code"><code set:text={cmd.linuxSource} /></pre>
+        <p>
+          Some of the PC’s tools need a small program (<code>grim</code> for screenshots, <code>wtype</code> for typing, and so on);
+          whatever is missing turns off just that tool, and Claude says what to install. So far it has only been run on Omarchy
+          (Hyprland); KDE, GNOME, Sway and X11 desktops are written to their documented interfaces but untried. The
+          <a class="textlink" href={GITHUB.linux} rel="noopener">Linux notes</a> have what works on which desktop, and how to move your
+          settings, keys and puck pairings over from the Windows app.
         </p>
 
         <h2 id="setup">3. Set up the hub</h2>

@@ -24,6 +24,7 @@ export const GITHUB = {
   protocol: `${PROJECT}/blob/main/docs/PROTOCOL.md`,
   architecture: `${PROJECT}/blob/main/docs/ARCHITECTURE.md`,
   linux: `${PROJECT}/blob/main/docs/LINUX.md`,
+  releases: `${PROJECT}/releases/latest`,
   compose: `${PROJECT}/blob/main/hub/docker-compose.yml`,
   website: WEBSITE,
   websiteIssues: `${WEBSITE}/issues`,
