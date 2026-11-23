@@ -56,6 +56,9 @@ STILLS = {
 # already asks for it to go (SCRIPT.md, "Still open"). Until the firmware replaces it, the site leaves
 # those faces out.
 FACES = {
+    # While the assistant speaks, with a face service (Openspline) on the hub: a frame of a real reply,
+    # face-01 saying "Sunlight is a mix of every colour" (the puck shows the video in place of the spark).
+    'talking': '36_talking_face.png',
     'playing': '32_film_home_playing.png',
     'home': '13_home_playing.png',
     'volume': '14_home_volume.png',
