@@ -32,8 +32,16 @@
         }
       },
       {
+        "title": "It answers, face to face",
+        "body": "Claude’s answer comes out loud, word by word on the screen, or with a face that moves to the voice when the hub has a PC with an NVIDIA card: pick one of 20, or give it your own picture.",
+        "face": {
+          "name": "talking",
+          "alt": "The puck's talking face while the assistant answers: a young woman with long fair hair, mid-word."
+        }
+      },
+      {
         "title": "Turn it",
-        "body": "Turn the puck itself: the volume while it talks or plays, Yes or No when it asks, minutes on a new timer.",
+        "body": "Turn the puck itself: the volume while it talks or plays, Yes or No when it asks, minutes on a new timer. Timers set on the puck work with no hub at all.",
         "face": {
           "name": "volume",
           "alt": "The puck's volume face, at 42."
@@ -45,14 +53,6 @@
         "face": {
           "name": "sonos",
           "alt": "The puck's Controls face: the Kitchen Sonos at 35%."
-        }
-      },
-      {
-        "title": "Set things by hand",
-        "body": "Turn to set the minutes, tap to start. Timers set on the puck work with no hub at all.",
-        "face": {
-          "name": "timer-new",
-          "alt": "The puck's New timer face: 10 minutes, turn to set, tap to start."
         }
       }
     ]
