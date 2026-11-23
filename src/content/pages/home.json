@@ -105,7 +105,7 @@
   "build": {
     "eyebrow": "Build your own",
     "heading": "One board, one hub, one key.",
-    "lede": "Everything Pucksley is, is on GitHub. A puck is a Waveshare board flashed with its firmware; the hub runs in Docker or on a Windows PC; Claude needs your Anthropic API key.",
+    "lede": "Everything Pucksley is, is on GitHub. A puck is a Waveshare board flashed with its firmware; the hub runs in Docker or on a Windows or Linux PC; Claude needs your Anthropic API key.",
     "steps": [
       {
         "title": "Get the board",
@@ -113,7 +113,7 @@
       },
       {
         "title": "Run the hub",
-        "body": "On a NAS or a Linux box in Docker, or as a tray app on a Windows PC. Its page opens at port 8765.",
+        "body": "On a NAS or a Linux box in Docker, or as a tray app on a Windows or Linux PC. Its page opens at port 8765.",
         "code": "docker compose \\n  -f hub/docker-compose.yml \\n  up -d --build"
       },
       {
