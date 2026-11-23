@@ -23,6 +23,7 @@ export const GITHUB = {
   plugins: `${PROJECT}/blob/main/docs/PLUGINS.md`,
   protocol: `${PROJECT}/blob/main/docs/PROTOCOL.md`,
   architecture: `${PROJECT}/blob/main/docs/ARCHITECTURE.md`,
+  linux: `${PROJECT}/blob/main/docs/LINUX.md`,
   compose: `${PROJECT}/blob/main/hub/docker-compose.yml`,
   website: WEBSITE,
   websiteIssues: `${WEBSITE}/issues`,
