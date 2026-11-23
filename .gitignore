@@ -40,3 +40,6 @@ __pycache__/
 
 # A still of the talking face: a photograph of a real person, from Openspline's set of faces.
 film/screens/30_talking_face.png
+
+# The puck firmware for /flash/, fetched from the latest Pucksley release at build time
+public/firmware/
