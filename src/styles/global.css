@@ -360,6 +360,18 @@ pre.code code { display: block; padding: 14px 16px; border-radius: var(--r); bac
 .docs-toc ol { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 2px; }
 .docs-toc a { display: block; padding: 5px 0 5px 12px; border-left: 2px solid var(--hair); font-size: 15px; font-weight: 700; color: var(--muted); }
 .docs-toc a:hover { color: var(--fg); border-left-color: var(--yellow); }
+
+/* Download it or build it: the choice at the top of Get started shows one path's steps. No script:
+   the radio buttons and :has() do it, and without :has() both paths show. */
+.path-choice { margin: 0 0 40px; padding: 0; border: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.path-choice legend { padding: 0; margin-bottom: 14px; font-size: 13px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.path-choice label { display: flex; gap: 12px; align-items: flex-start; padding: 18px 18px 18px 16px; border: 2px solid var(--hair); border-radius: 16px; cursor: pointer; font-size: 15.5px; line-height: 1.5; color: var(--muted); }
+.path-choice label strong { color: var(--fg); }
+.path-choice input { margin-top: 4px; accent-color: var(--ink); flex: none; width: 18px; height: 18px; }
+.path-choice label:has(input:checked) { border-color: var(--yellow); background: rgba(255, 214, 0, .12); }
+.path-choice label:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.docs-grid:has(#path-download:checked) .for-build,
+.docs-grid:has(#path-build:checked) .for-download { display: none; }
 .docs-body { max-width: 760px; }
 .docs-body h2 { font-size: clamp(26px, 2.6vw, 32px); margin-top: 64px; scroll-margin-top: calc(var(--navh) + 24px); }
 .docs-body h2:first-child { margin-top: 0; }
@@ -461,6 +473,7 @@ pre.code code { display: block; padding: 14px 16px; border-radius: var(--r); bac
   .how-grid, .runs-grid, .build-steps { grid-template-columns: minmax(0, 1fr); }
   .docs-toc ol { grid-template-columns: minmax(0, 1fr); }
   .docs-faces .face { width: 120px; height: 120px; }
+  .path-choice { grid-template-columns: minmax(0, 1fr); }
   .hero-actions .btn { flex: 1 1 auto; }
   .how-item { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 0 20px; align-items: start; }
   .how-item .face { width: 104px; height: 104px; margin: 6px 0 0 6px; grid-row: span 2; }

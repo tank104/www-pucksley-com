@@ -1,0 +1,95 @@
+---
+// Flash a puck from the browser: ESP Web Tools writes the firmware of Pucksley's latest release over
+// USB (Web Serial: Chrome or Edge on a computer). The firmware is copied into public/firmware/ by
+// scripts/fetch-firmware.mjs before each build; with none there, the page says so.
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/Section.astro';
+import { GITHUB, BOARD } from '../lib/site';
+
+// Read at build time, from the project folder (npm run build runs from there)
+const manifestFile = join(process.cwd(), 'public', 'firmware', 'manifest.json');
+const firmware = existsSync(manifestFile) ? (JSON.parse(readFileSync(manifestFile, 'utf8')) as { version: string }) : null;
+
+const esptool = 'pip install esptool\npython -m esptool --chip esp32s3 -p COM5 write_flash @flash_args';
+---
+<BaseLayout
+  title="Flash a puck: Pucksley"
+  description={`Put Pucksley's firmware on a ${BOARD} from your browser: Chrome or Edge and a USB-C cable, nothing to install.`}
+>
+  <Section surface="card" air="hero" id="top" wrapClass="narrow" class="prose flash">
+    <p class="eyebrow">Get started</p>
+    <h1>Flash a puck.</h1>
+    <p class="lede">
+      Put Pucksley’s firmware on a {BOARD} from this page. You need Chrome or Edge on a computer (Windows, macOS or Linux) and a USB-C
+      cable. Nothing to install.
+    </p>
+
+    {firmware ? (
+      <div class="flash-box">
+        <p class="flash-version">Pucksley <strong>{firmware.version}</strong>, the <a class="textlink" href={GITHUB.releases} rel="noopener">latest release</a></p>
+        <esp-web-install-button manifest="/firmware/manifest.json">
+          <button slot="activate" class="btn btn--lg" type="button">Connect and flash</button>
+          <p slot="unsupported" class="flash-note">
+            This browser can’t reach USB devices. Open this page in Chrome or Edge on a computer (phones and Firefox can’t), or use
+            esptool below.
+          </p>
+          <p slot="not-allowed" class="flash-note">The flasher needs a secure page: open it at https://www.pucksley.com/flash/.</p>
+        </esp-web-install-button>
+      </div>
+    ) : (
+      <div class="flash-box">
+        <p class="flash-note">
+          There’s no release to flash from here yet. Until there is, <a class="textlink" href="/get-started/#flash">build the firmware
+          yourself</a> with ESP-IDF.
+        </p>
+      </div>
+    )}
+
+    <h2>How it goes</h2>
+    <ol class="flash-steps">
+      <li><strong>Plug the puck in</strong> with a USB-C cable that carries data (some only charge).</li>
+      <li>
+        <strong>Press Connect and flash,</strong> and pick the puck in the list the browser shows: “USB JTAG/serial debug unit”. Not
+        there? Unplug it, hold its BOOT button, and plug it in again while holding it.
+      </li>
+      <li>
+        <strong>The first time,</strong> let it erase the board when it asks: that clears whatever came on it. <strong>To update</strong>
+        a puck that already has Pucksley, don’t erase: it keeps its Wi‑Fi and its pairing with the hub.
+      </li>
+      <li>
+        <strong>When it’s done</strong> (a minute or two), the puck restarts into Pucksley. A new puck then needs your Wi‑Fi and the
+        hub’s approval: <a class="textlink" href="/get-started/#join">Wi‑Fi and approval</a>.
+      </li>
+    </ol>
+    <p>
+      On Linux the browser needs your user to be in the group that owns the port (<code>uucp</code> on Arch and Omarchy,
+      <code>dialout</code> on Debian, Ubuntu and Fedora): add yourself, then log out and in again.
+    </p>
+
+    <h2>Or with esptool</h2>
+    <p>
+      Download <code>pucksley-firmware.zip</code> from the <a class="textlink" href={GITHUB.releases} rel="noopener">latest release</a>,
+      unpack it, and in the <code>pucksley-firmware</code> folder:
+    </p>
+    <pre class="code"><code set:text={esptool} /></pre>
+    <p>
+      With your port for <code>COM5</code>: <code>/dev/ttyACM0</code> on Linux, <code>/dev/cu.usbmodem…</code> on a Mac. That writes the same files the button does, and keeps the puck’s Wi‑Fi and pairing too. To build the firmware yourself instead,
+      see <a class="textlink" href="/get-started/#flash">Get started</a>.
+    </p>
+  </Section>
+</BaseLayout>
+
+<script>
+  // ESP Web Tools (its <esp-web-install-button>), bundled with the site rather than fetched from elsewhere
+  import 'esp-web-tools/dist/web/install-button.js';
+</script>
+
+<style>
+  .flash-box { margin-top: 36px; padding: 28px; border: 1px solid var(--hair); border-radius: 18px; }
+  .flash-version { margin: 0 0 18px; color: var(--muted); }
+  .flash-note { margin: 0; color: var(--muted); }
+  .flash-steps { padding-left: 1.4em; list-style: decimal; }
+  .flash-steps li { margin-top: 10px; }
+</style>

@@ -10,7 +10,7 @@ import { GITHUB, BOARD } from '../lib/site';
 
 const toc = [
   ['need', 'What you need'],
-  ['code', 'Get the code'],
+  ['code', 'Get the code', 'build'],
   ['hub', 'Run the hub'],
   ['setup', 'Set up the hub'],
   ['flash', 'Flash the puck'],
@@ -28,7 +28,8 @@ const cmd = {
   clone: 'git clone https://github.com/tank104/Pucksley.git\ncd Pucksley',
   docker: 'docker compose -f hub/docker-compose.yml up -d --build',
   windowsInstall: 'irm https://raw.githubusercontent.com/tank104/Pucksley/main/scripts/install.ps1 | iex',
-  tray: 'dotnet run --project hub/src/Hosts/Pucksley.Tray',
+  tray: 'dotnet run --project hub/src/Hosts/Pucksley.Tray            # to try it\n./scripts/build.ps1 -HubOnly                                      # or build it…\n./scripts/install.ps1 -From dist/Pucksley                         # …and install it',
+  dockerFromRelease: 'git clone https://github.com/tank104/Pucksley.git\ncd Pucksley\ndocker compose -f hub/docker-compose.yml up -d --build',
   linuxInstall: 'curl -fsSL https://raw.githubusercontent.com/tank104/Pucksley/main/scripts/install.sh | bash',
   linuxFirewall: 'sudo ufw allow from 192.168.0.0/16 to any port 8765 proto tcp',
   linuxSource: './scripts/build.sh --hub-only --install',
@@ -82,68 +83,99 @@ const plugins: [string, string, string][] = [
       <nav class="docs-toc" aria-label="On this page">
         <p class="eyebrow">On this page</p>
         <ol>
-          {toc.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
+          {toc.map(([id, label, path]) => <li class={path ? `for-${path}` : undefined}><a href={`#${id}`}>{label}</a></li>)}
         </ol>
       </nav>
 
       <article class="docs-body">
+        <fieldset class="path-choice">
+          <legend>How do you want to set it up?</legend>
+          <label>
+            <input type="radio" name="path" id="path-download" value="download" checked />
+            <span><strong>Download it</strong> (the usual way): an installer for the hub, and the puck flashed from your browser. Nothing to build.</span>
+          </label>
+          <label>
+            <input type="radio" name="path" id="path-build" value="build" />
+            <span><strong>Build it yourself</strong> from the code, with the .NET 10 SDK and ESP-IDF 5.5: to change it, or to try what’s newest.</span>
+          </label>
+        </fieldset>
+
         <h2 id="need">What you need</h2>
         <ul>
           <li><strong>The board:</strong> a {BOARD}. Its round 1.75-inch AMOLED touch screen, microphones, speaker, motion sensor, side button and battery are the puck.</li>
           <li><strong>Somewhere for the hub:</strong> a NAS or other x86-64 machine that runs Docker (Synology’s Intel and AMD “plus” models do), or a Windows or Linux PC.</li>
           <li><strong>An Anthropic API key</strong> for Claude. Use one with a spending limit.</li>
           <li><strong>A way to hear and speak.</strong> Whisper, Windows voices and (on Linux) eSpeak NG need no key. Deepgram (to hear) and Azure (to speak) are what the project recommends.</li>
-          <li><strong>To flash the puck:</strong> ESP-IDF 5.5 and a USB cable. To build the hub from source: the .NET 10 SDK (on Linux, its ASP.NET Core parts too).</li>
+          <li class="for-download"><strong>To flash the puck:</strong> a USB-C cable, and Chrome or Edge on a computer.</li>
+          <li class="for-build"><strong>To build:</strong> the .NET 10 SDK for the hub (on Linux, its ASP.NET Core parts too), ESP-IDF 5.5 for the firmware, and a USB-C cable.</li>
         </ul>
 
-        <h2 id="code">1. Get the code</h2>
-        <p>
-          For the puck’s firmware, the hub in Docker, or building anything yourself. On a Windows or Linux PC the hub needs none of it:
-          one line installs the latest release (step 2).
-        </p>
-        <pre class="code"><code set:text={cmd.clone} /></pre>
+        <div class="for-build">
+          <h2 id="code">Get the code</h2>
+          <pre class="code"><code set:text={cmd.clone} /></pre>
+        </div>
 
-        <h2 id="hub">2. Run the hub</h2>
+        <h2 id="hub">1. Run the hub</h2>
         <h3>On a NAS, in Docker</h3>
-        <pre class="code"><code set:text={cmd.docker} /></pre>
+        <p class="for-download">The container is built from the code, on the NAS:</p>
+        <pre class="code for-download"><code set:text={cmd.dockerFromRelease} /></pre>
+        <pre class="code for-build"><code set:text={cmd.docker} /></pre>
         <p>
           Host networking is needed, for finding the pucks and the Sonos speakers. Settings live in <code>hub/pucksley-data/</code>. On a
           Synology, create a project from <a class="textlink" href={GITHUB.compose} rel="noopener"><code>hub/docker-compose.yml</code></a> in
           Container Manager. The container has everything except the plugins that control a PC.
         </p>
         <h3>On a Windows PC</h3>
-        <p>In PowerShell:</p>
-        <pre class="code"><code set:text={cmd.windowsInstall} /></pre>
+        <div class="for-download">
+          <p>In PowerShell:</p>
+          <pre class="code"><code set:text={cmd.windowsInstall} /></pre>
+          <p>
+            That downloads the <a class="textlink" href={GITHUB.releases} rel="noopener">latest release</a>, installs it with a Start menu
+            entry and starts it. Nothing else to install: it brings its own .NET. To update, run the same line again: it stops the hub,
+            swaps the new copy in and starts it, and your settings stay. Rather not paste a script? Download
+            <code>Pucksley-windows-x64.zip</code> from the release, unpack it somewhere to keep and run <code>Pucksley.exe</code>.
+          </p>
+        </div>
+        <div class="for-build">
+          <p>From the code, in PowerShell:</p>
+          <pre class="code"><code set:text={cmd.tray} /></pre>
+          <p>Installed this way it updates the same way: <code>git pull</code>, then build and install again.</p>
+        </div>
         <p>
-          That downloads the <a class="textlink" href={GITHUB.releases} rel="noopener">latest release</a>, installs it with a Start menu
-          entry and starts it. Nothing else to install: it brings its own .NET. A tray icon appears and the hub’s page opens at
+          A tray icon appears and the hub’s page opens at
           <code>http://127.0.0.1:8765</code>; from another computer, use the link with <code>?key=</code> that the tray menu and the log
           show. Tick <strong>Start with Windows</strong> in the tray menu to have it there every time, and allow it through Windows
           Firewall on private networks when Windows asks, so the pucks can reach it.
         </p>
-        <p>
-          To update, run the same line again: it stops the hub, swaps the new copy in and starts it, and your settings stay. Rather not
-          paste a script? Download <code>Pucksley-windows-x64.zip</code> from the release, unpack it somewhere to keep and run
-          <code>Pucksley.exe</code>. From the code instead:
-        </p>
-        <pre class="code"><code set:text={cmd.tray} /></pre>
 
         <h3>On a Linux PC</h3>
-        <pre class="code"><code set:text={cmd.linuxInstall} /></pre>
+        <div class="for-download">
+          <pre class="code"><code set:text={cmd.linuxInstall} /></pre>
+          <p>
+            That downloads the latest release (x86-64 or ARM64), installs it in <code>~/.local/share/pucksley</code> and the app
+            launcher, and starts it. Nothing else to install: it brings its own .NET. To update, run the same line again. Rather not
+            pipe a script? Download <code>pucksley-linux-x64.tar.gz</code> (or <code>-arm64</code>) from the release, unpack it and run
+            <code>./install.sh</code> in the <code>pucksley</code> folder.
+          </p>
+        </div>
+        <div class="for-build">
+          <pre class="code"><code set:text={cmd.linuxSource} /></pre>
+          <p>
+            That builds it (the build brings its own .NET), installs it in <code>~/.local/share/pucksley</code> and the app launcher,
+            and starts it. To update, <code>git pull --ff-only</code> and run it again.
+          </p>
+        </div>
         <p>
-          That downloads the latest release (x86-64 or ARM64), installs it in <code>~/.local/share/pucksley</code> and the app launcher,
-          and starts it. Nothing else to install: it brings its own .NET. The same tray icon appears wherever the desktop has a tray (KDE
+          The same tray icon appears wherever the desktop has a tray (KDE
           Plasma, Hyprland and Omarchy, Waybar and Sway bars, Xfce, Cinnamon, and GNOME with the AppIndicator extension; on Omarchy it
           sits behind the bar’s ‹ until you pin it), and the page opens at the same address. Without a tray the hub runs all the same.
         </p>
         <p>
           Tick <strong>Start at login</strong> in the tray menu to start it with the desktop; where the desktop runs on systemd (Omarchy,
-          GNOME, KDE) that also starts it again if it ever crashes. To update, run the same line again: settings stay, in
-          <code>~/.config/pucksley</code>. If a firewall is on (Omarchy turns one on), let the pucks in:
+          GNOME, KDE) that also starts it again if it ever crashes. Updates keep your settings, in <code>~/.config/pucksley</code>.
+          If a firewall is on (Omarchy turns one on), let the pucks in:
         </p>
         <pre class="code"><code set:text={cmd.linuxFirewall} /></pre>
-        <p>From the code instead (it installs the same way; <code>git pull</code> first to update):</p>
-        <pre class="code"><code set:text={cmd.linuxSource} /></pre>
         <p>
           Some of the PC’s tools need a small program (<code>grim</code> for screenshots, <code>wtype</code> for typing, and so on);
           whatever is missing turns off just that tool, and Claude says what to install. So far it has only been run on Omarchy
@@ -152,7 +184,7 @@ const plugins: [string, string, string][] = [
           settings, keys and puck pairings over from the Windows app.
         </p>
 
-        <h2 id="setup">3. Set up the hub</h2>
+        <h2 id="setup">2. Set up the hub</h2>
         <p>In the hub’s page:</p>
         <ul>
           <li><strong>Assistant:</strong> paste your Anthropic API key. The model defaults to Claude Opus 5.5 at low effort, which keeps spoken answers quick.</li>
@@ -166,8 +198,19 @@ const plugins: [string, string, string][] = [
         </ul>
         <p>Use <strong>Talk</strong> on the page to try the whole loop with your browser’s microphone before there is a puck.</p>
 
-        <h2 id="flash">4. Flash the puck</h2>
-        <pre class="code"><code set:text={cmd.flash} /></pre>
+        <h2 id="flash">3. Flash the puck</h2>
+        <p>Plug the puck in with a USB-C cable. If the computer doesn’t see it, hold its BOOT button while plugging it in.</p>
+        <div class="for-download">
+          <p>
+            <a class="btn" href="/flash/">Flash it from your browser</a>
+          </p>
+          <p>
+            In Chrome or Edge: press Connect, pick the puck, and it writes the latest release. Or download
+            <code>pucksley-firmware.zip</code> from the <a class="textlink" href={GITHUB.releases} rel="noopener">release</a> and flash it
+            with esptool; <a class="textlink" href="/flash/">the flash page</a> has the line.
+          </p>
+        </div>
+        <pre class="code for-build"><code set:text={cmd.flash} /></pre>
         <p>To keep a copy of everything on the board first (all 16 MB):</p>
         <pre class="code"><code set:text={cmd.backup} /></pre>
         <p>
@@ -175,7 +218,7 @@ const plugins: [string, string, string][] = [
           and Omarchy, <code>dialout</code> on Debian, Ubuntu and Fedora.
         </p>
 
-        <h2 id="join">5. Wi‑Fi and approval</h2>
+        <h2 id="join">4. Wi‑Fi and approval</h2>
         <div class="docs-faces">
           <Face face={{ name: 'setup', alt: "The puck's Wi‑Fi setup face: join Puck-1D4D, then open 192.168.4.1, with a QR code." }} size={150} />
           <Face face={{ name: 'setup-code', alt: "The puck's New puck face: a three-digit code to check on the hub's page." }} size={150} />
@@ -186,7 +229,7 @@ const plugins: [string, string, string][] = [
         </ul>
         <p>Give each puck a <strong>name</strong> and a <strong>room</strong> on the hub’s page: “turn the music down” from the kitchen puck then means the kitchen speaker.</p>
 
-        <h2 id="plugins">6. Plugins</h2>
+        <h2 id="plugins">5. Plugins</h2>
         <p>These come with the hub. Each has a card on its Plugins page.</p>
         <div class="docs-table">
           <table>
@@ -197,7 +240,7 @@ const plugins: [string, string, string][] = [
           </table>
         </div>
 
-        <h2 id="pc">7. The PC, with the hub on a NAS</h2>
+        <h2 id="pc">6. The PC, with the hub on a NAS</h2>
         <p>The PC’s controls (its volume, apps and power) can only run on the PC. With the hub on a NAS, the PC’s app lends it just those:</p>
         <ol>
           <li>On the PC, run the tray app (Windows or Linux). In its page, under Household and More than one hub, turn off “Pucks connect to this hub”, turn on “Share this hub’s tools”, and list <code>pc-audio</code> and <code>pc</code> under “Only these plugins”. The page then shows an address and a key line.</li>
