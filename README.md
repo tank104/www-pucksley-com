@@ -94,7 +94,7 @@ There is one environment, prd. (There is no staging: pull requests are checked b
 | Resource group | `pk-www-prd` |
 | Static Web App | `pk-prd-www-swa-ae` (eastasia) |
 | Custom hostname | `www.pucksley.com` (the default: `pucksley.com` and the `azurestaticapps.net` address redirect to it) |
-| Deploy trigger | a merged pull request (push to `main`), or by hand (Actions, Deploy prd, Run workflow), from `main` only |
+| Deploy trigger | a merged pull request (push to `main`), or by hand (Actions, Deploy www, Run workflow), from `main` only |
 | GitHub Environment | `prd` |
 | OIDC app registration | `pk-www-prd-github` |
 

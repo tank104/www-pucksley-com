@@ -1,8 +1,8 @@
-name: Deploy prd
+name: Deploy www
 
 # Every pull request runs `test` (the check main's ruleset requires). Merging a
-# pull request (a push to main) then deploys prd. It can also be run by hand
-# (Actions -> Deploy prd -> Run workflow). The `prd` environment only accepts
+# pull request (a push to main) then deploys the site. It can also be run by hand
+# (Actions -> Deploy www -> Run workflow). The `prd` environment only accepts
 # runs from main (infra/bootstrap.ps1 sets that), so pull requests never reach
 # Azure.
 on:
@@ -18,7 +18,7 @@ permissions:
 
 # Deploys queue one behind another; each pull request's checks run on their own.
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('test-{0}', github.ref) || 'deploy-prd' }}
+  group: ${{ github.event_name == 'pull_request' && format('test-{0}', github.ref) || 'deploy-www' }}
   cancel-in-progress: false
 
 env:
@@ -42,7 +42,7 @@ jobs:
       - run: npm run check
       - run: npm run build
 
-  prd-infra:
+  infra:
     if: github.event_name != 'pull_request'
     needs: test
     runs-on: ubuntu-latest
@@ -66,20 +66,20 @@ jobs:
             --resource-group pk-www-prd \
             --template-file infra/main.bicep \
             --parameters infra/prd.bicepparam \
-            --name prd-${{ github.run_id }}
+            --name www-${{ github.run_id }}
           swaName=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.swaName.value -o tsv)
           echo "swaName=${swaName}" >> "$GITHUB_OUTPUT"
           customHostname=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.customHostname.value -o tsv)
           echo "customHostname=${customHostname}" >> "$GITHUB_OUTPUT"
           apexHostname=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.apexHostname.value -o tsv)
           echo "apexHostname=${apexHostname}" >> "$GITHUB_OUTPUT"
 
@@ -158,8 +158,8 @@ jobs:
           fi
           echo "$HOST: ${status:-not registered}, default=${isDefault:-false}"
 
-  prd-app:
-    needs: prd-infra
+  app:
+    needs: infra
     runs-on: ubuntu-latest
     environment: prd
     env:
@@ -176,7 +176,7 @@ jobs:
         id: token
         run: |
           token=$(az staticwebapp secrets list \
-            --name ${{ needs.prd-infra.outputs.swaName }} \
+            --name ${{ needs.infra.outputs.swaName }} \
             --resource-group pk-www-prd \
             --query properties.apiKey -o tsv)
           echo "::add-mask::${token}"

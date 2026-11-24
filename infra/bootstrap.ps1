@@ -202,7 +202,7 @@ try {
     Write-Host ""
     Write-Host "=== Done ===" -ForegroundColor Green
     $results | Format-Table -AutoSize
-    Write-Host "Merging to main: deploy-prd.yml deploys infra + site to prd."
+    Write-Host "Merging to main: deploy.yml (Deploy www) deploys infra + site."
 }
 finally {
     az account set --subscription $previous
