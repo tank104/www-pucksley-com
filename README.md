@@ -87,21 +87,23 @@ copies in `public/videos/` are made, and [`film/README.md`](film/README.md) for 
 Azure Static Web Apps, set up with Bicep (`infra/`) and deployed by GitHub Actions (`.github/workflows/`), the same
 shape as the sibling sites, with a `pk-*` naming convention, in the owner's Personal Azure subscription.
 
-| | stg | prd |
-|---|---|---|
-| Resource group | `pk-www-stg` | `pk-www-prd` |
-| Static Web App | `pk-stg-www-swa-ae` (eastasia) | `pk-prd-www-swa-ae` (eastasia) |
-| Custom hostname | `stg-www.pucksley.com` | `www.pucksley.com` (the default: `pucksley.com` and the `azurestaticapps.net` address redirect to it) |
-| Deploy trigger | push to `main` | by hand (Actions, Deploy prd, Run workflow), from `main` only |
-| GitHub Environment | `stg` | `prd` |
-| OIDC app registration | `pk-www-stg-github` | `pk-www-prd-github` |
+There is one environment, prd. (There is no staging: pull requests are checked by the build, then go live when merged.)
 
-Each environment's Bicep (`infra/main.bicep`) makes the Static Web App, App Insights, the storage table the email form
+| | prd |
+|---|---|
+| Resource group | `pk-www-prd` |
+| Static Web App | `pk-prd-www-swa-ae` (eastasia) |
+| Custom hostname | `www.pucksley.com` (the default: `pucksley.com` and the `azurestaticapps.net` address redirect to it) |
+| Deploy trigger | a merged pull request (push to `main`), or by hand (Actions, Deploy prd, Run workflow), from `main` only |
+| GitHub Environment | `prd` |
+| OIDC app registration | `pk-www-prd-github` |
+
+The Bicep (`infra/main.bicep`) makes the Static Web App, App Insights, the storage table the email form
 writes to (`api/waitlist`), and its own CNAME in the pucksley.com zone. prd also points the bare `pucksley.com` at its
 Static Web App, with an Azure DNS alias record (an apex cannot be a CNAME).
 
-The workflows then register each hostname on its Static Web App, once, without waiting: Azure validates it and issues
-the certificate in the background. `www` and `stg-www` validate by their CNAME. The apex validates by a token, which
+The workflow then registers each hostname on the Static Web App, once, without waiting: Azure validates it and issues
+the certificate in the background. `www` validates by its CNAME. The apex validates by a token, which
 the prd workflow publishes as a TXT record at `@` (and which is then kept in `infra/zone.bicep`). Last, the prd workflow makes `www` the Static Web App's default
 domain, so every other hostname redirects there (301). Registering `www` again would undo that, which is why each
 hostname is registered only once.
@@ -111,18 +113,17 @@ The domain is registered at OnlyDomains, with its nameservers set to the zone's
 (`az network dns zone show -g global -n pucksley.com --query nameServers`). The zone file holds what is not the
 website's: every TXT value at `@` (Google Search Console's verification, the Static Web App's apex token, SPF), and,
 since pucksley.com has no email, a null MX and a DMARC `p=reject`, so no one can send mail as it. The website's own
-records (`www`, `stg-www`, the apex A record) are written by the pipelines above. CI does not deploy the zone file:
+records (`www`, the apex A record) are written by the pipeline above. CI does not deploy the zone file:
 after changing it, run `az deployment group create -g global --template-file infra/zone.bicep --subscription Personal`.
 
 **The identities.** `infra/bootstrap.ps1` makes everything the workflows stand on, and can be run again safely: the
-zone, the two resource groups, an app registration per environment with a federated credential for that GitHub
-Environment, and three roles each (Contributor on its own resource group, DNS Zone Contributor on the pucksley.com zone,
+zone, the resource group, an app registration with a federated credential for the `prd` GitHub Environment, and
+three roles (Contributor on its own resource group, DNS Zone Contributor on the pucksley.com zone,
 and "Pucksley www DNS Deployer", deployment operations only, on `global`, for the cross-group CNAME). It also sets the
-repository's `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` variables and each environment's `AZURE_CLIENT_ID`, and
+repository's `AZURE_TENANT_ID` and `AZURE_SUBSCRIPTION_ID` variables and the environment's `AZURE_CLIENT_ID`, and
 limits the `prd` environment to `main`.
 
-Pull requests from this repository run the build and a what-if against stg. Pull requests from forks run the build
-only: they get no Azure sign-in. `main` is protected: changes arrive by pull request, `test` must pass, and there are
+Pull requests run the type check and the build (`test`), and get no Azure sign-in. `main` is protected: changes arrive by pull request, `test` must pass, and there are
 no force-pushes or deletion. Only the maintainer can merge, and every pull request asks them for a review
 ([`.github/CODEOWNERS`](.github/CODEOWNERS)).
 

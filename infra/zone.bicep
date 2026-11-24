@@ -4,7 +4,7 @@
 // Ownership: this file owns the zone itself and the records that are not the website's (the apex TXT
 // record and the mail records below). The website's records belong to its own pipeline, which writes them
 // on every deploy; do not declare them here:
-//   - `www` and `stg-www` CNAMEs (infra/main.bicep, modules/dns-cname.bicep)
+//   - the `www` CNAME (infra/main.bicep, modules/dns-cname.bicep)
 //   - the apex `@` A record, an alias onto the prd Static Web App (modules/dns-apex.bicep)
 // Deploy this file in Incremental mode only (the default): Complete mode would delete those records.
 // It is not deployed by CI: run it by hand (or infra/bootstrap.ps1) after changing it:

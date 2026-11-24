@@ -1,7 +1,7 @@
 @description('Azure region for SWA. Must be one of: centralus, eastus2, eastasia, westeurope, westus2.')
 param location string
 
-@description('Resource name prefix (e.g. pk-stg-www).')
+@description('Resource name prefix (e.g. pk-prd-www).')
 param prefix string
 
 @description('SWA SKU.')

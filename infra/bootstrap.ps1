@@ -5,7 +5,7 @@
 #   - The pucksley.com DNS zone in the `global` resource group (infra/zone.bicep), and prints the
 #     nameservers to give the registrar (OnlyDomains).
 #   - The custom role 'Pucksley www DNS Deployer' (deployment operations only) on `global`.
-#   - For each environment (stg, prd):
+#   - For the environment (prd; there is no staging):
 #       Resource group pk-www-{env} in Australia East, tagged.
 #       Microsoft Entra app registration + service principal pk-www-{env}-github.
 #       A federated credential letting GitHub Actions sign in as that SP when a job runs in the
@@ -14,8 +14,8 @@
 #         DNS Zone Contributor on the pucksley.com zone (the env's CNAME, written cross-RG by
 #         infra/modules/dns-cname.bicep); 'Pucksley www DNS Deployer' on `global` (so that
 #         cross-RG module can land its nested-deployment tracker there).
-#   - The GitHub side: repository variables AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID, the `stg` and
-#     `prd` environments with each one's AZURE_CLIENT_ID, and `prd` limited to the main branch.
+#   - The GitHub side: repository variables AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID, the `prd`
+#     environment with its AZURE_CLIENT_ID, limited to the main branch.
 #
 # Needs: `az` signed in with Owner on the Personal subscription, and `gh` signed in with admin on the
 # repository. The az CLI's default subscription is put back as it was at the end.
@@ -26,8 +26,8 @@
 param(
     [string]$GitHubRepo = 'tank104/www-pucksley-com',
     [string]$Subscription = 'Personal',
-    [ValidateSet('stg', 'prd', 'both')]
-    [string]$Env = 'both',
+    [ValidateSet('prd')]
+    [string]$Env = 'prd',
     [string]$Location = 'australiaeast'
 )
 
@@ -196,14 +196,13 @@ try {
     gh variable set AZURE_TENANT_ID --repo $GitHubRepo --body $account.tenantId
     gh variable set AZURE_SUBSCRIPTION_ID --repo $GitHubRepo --body $account.id
 
-    $envs = if ($Env -eq 'both') { @('stg', 'prd') } else { @($Env) }
+    $envs = @($Env)
     $results = foreach ($e in $envs) { Initialize-Environment $e $account.id $subjectPrefix }
 
     Write-Host ""
     Write-Host "=== Done ===" -ForegroundColor Green
     $results | Format-Table -AutoSize
-    Write-Host "Push to main: deploy-stg.yml deploys infra + site to stg."
-    Write-Host "Run 'Deploy prd' by hand (Actions -> Deploy prd -> Run workflow) to ship prd."
+    Write-Host "Merging to main: deploy-prd.yml deploys infra + site to prd."
 }
 finally {
     az account set --subscription $previous
