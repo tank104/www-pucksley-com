@@ -1,14 +1,13 @@
-// www.pucksley.com: one environment (stg or prd) of the site. The same shape as the sibling sites'
+// www.pucksley.com: the prd environment of the site. The same shape as the sibling sites'
 // infra: a Static Web App with managed Functions (api/), App Insights, a storage table for the email
 // form, and the env's CNAME written cross-RG into the pucksley.com zone in `global`. Deployed by
-// .github/workflows/deploy-*.yml into pk-www-{env}; the RGs, the zone and the deploy identities come
+// .github/workflows/deploy.yml into pk-www-{env}; the RGs, the zone and the deploy identities come
 // from infra/bootstrap.ps1.
 
 targetScope = 'resourceGroup'
 
-@description('Environment name (stg or prd). Drives resource naming.')
+@description('Environment name (prd; staging was removed). Drives resource naming.')
 @allowed([
-  'stg'
   'prd'
 ])
 param env string

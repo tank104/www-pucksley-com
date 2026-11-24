@@ -1,17 +1,24 @@
-name: Deploy prd
+name: Deploy www
 
-# Manual-only: a prod deploy happens only when someone runs this workflow
-# (Actions -> Deploy prd -> Run workflow), never on push. The `prd`
-# environment only accepts runs from main (infra/bootstrap.ps1 sets that).
+# Every pull request runs `test` (the check main's ruleset requires). Merging a
+# pull request (a push to main) then deploys the site. It can also be run by hand
+# (Actions -> Deploy www -> Run workflow). The `prd` environment only accepts
+# runs from main (infra/bootstrap.ps1 sets that), so pull requests never reach
+# Azure.
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
+# Deploys queue one behind another; each pull request's checks run on their own.
 concurrency:
-  group: deploy-prd
+  group: ${{ github.event_name == 'pull_request' && format('test-{0}', github.ref) || 'deploy-www' }}
   cancel-in-progress: false
 
 env:
@@ -19,7 +26,25 @@ env:
   AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
 jobs:
-  prd-infra:
+  # Build on every push and PR, forks included. No Azure needed: the type
+  # check and the build.
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  infra:
+    if: github.event_name != 'pull_request'
+    needs: test
     runs-on: ubuntu-latest
     environment: prd
     env:
@@ -41,20 +66,20 @@ jobs:
             --resource-group pk-www-prd \
             --template-file infra/main.bicep \
             --parameters infra/prd.bicepparam \
-            --name prd-${{ github.run_id }}
+            --name www-${{ github.run_id }}
           swaName=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.swaName.value -o tsv)
           echo "swaName=${swaName}" >> "$GITHUB_OUTPUT"
           customHostname=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.customHostname.value -o tsv)
           echo "customHostname=${customHostname}" >> "$GITHUB_OUTPUT"
           apexHostname=$(az deployment group show \
             --resource-group pk-www-prd \
-            --name prd-${{ github.run_id }} \
+            --name www-${{ github.run_id }} \
             --query properties.outputs.apexHostname.value -o tsv)
           echo "apexHostname=${apexHostname}" >> "$GITHUB_OUTPUT"
 
@@ -64,9 +89,10 @@ jobs:
           SWA: ${{ steps.deploy.outputs.swaName }}
           HOST: ${{ steps.deploy.outputs.customHostname }}
         run: |
-          # See deploy-stg.yml: registered async so validation never blocks
-          # (and outlives) the OIDC-authed deploy. Registered once only: doing
-          # it again would unset www as the default domain (the step below).
+          # Registered with --no-wait so cname-delegation validation runs
+          # asynchronously in Azure and never blocks (and outlives) the
+          # OIDC-authed deploy. Registered once only: doing it again would
+          # unset www as the default domain (the step below).
           status=$(az staticwebapp hostname show --name "$SWA" --resource-group pk-www-prd \
             --hostname "$HOST" --query status -o tsv 2>/dev/null || true)
           if [ -z "$status" ]; then
@@ -132,8 +158,8 @@ jobs:
           fi
           echo "$HOST: ${status:-not registered}, default=${isDefault:-false}"
 
-  prd-app:
-    needs: prd-infra
+  app:
+    needs: infra
     runs-on: ubuntu-latest
     environment: prd
     env:
@@ -150,7 +176,7 @@ jobs:
         id: token
         run: |
           token=$(az staticwebapp secrets list \
-            --name ${{ needs.prd-infra.outputs.swaName }} \
+            --name ${{ needs.infra.outputs.swaName }} \
             --resource-group pk-www-prd \
             --query properties.apiKey -o tsv)
           echo "::add-mask::${token}"

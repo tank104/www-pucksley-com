@@ -1,7 +1,7 @@
 @description('Azure region.')
 param location string
 
-@description('Resource name prefix (e.g. pk-stg-www).')
+@description('Resource name prefix (e.g. pk-prd-www).')
 param prefix string
 
 // Storage account names: 3-24 chars, lowercase alphanumeric only (no hyphens).

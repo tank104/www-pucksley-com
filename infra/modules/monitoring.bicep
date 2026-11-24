@@ -1,7 +1,7 @@
 @description('Azure region for non-SWA resources (e.g. australiaeast).')
 param location string
 
-@description('Resource name prefix (e.g. pk-stg-www).')
+@description('Resource name prefix (e.g. pk-prd-www).')
 param prefix string
 
 resource laws 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
